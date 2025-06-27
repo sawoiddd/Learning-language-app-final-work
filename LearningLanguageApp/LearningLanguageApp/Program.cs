@@ -10,5 +10,6 @@ internal class Program
 
 
 
+        Console.WriteLine("test");
     }
 }
