@@ -24,5 +24,4 @@ public class User
     public DateTime CreateAt { get; set; }
     [Required]
     public DateTime UpdateAt{ get; set; }
-    public DateTime DeletedAt{ get; set; }
 }
