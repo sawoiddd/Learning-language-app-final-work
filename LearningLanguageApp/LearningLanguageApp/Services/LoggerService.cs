@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace LearningLanguageApp.Services;
 
@@ -6,7 +7,11 @@ public class LoggerService
 {
     public static ILogger GetLogger()
     {
-        var logPath = "Logs/Logs.txt";
+        var config = new ConfigurationBuilder()
+             .AddJsonFile("appsettings.json", optional: false)
+             .Build();
+
+        var logPath = config["Logging:LogPath"];
 
         var logDirectory = Path.GetDirectoryName(logPath);
         Directory.CreateDirectory(logDirectory);
