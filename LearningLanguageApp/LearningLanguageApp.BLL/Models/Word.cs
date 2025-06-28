@@ -15,12 +15,10 @@ public class Word
     [MaxLength(64)]
     public string Translation { get; set; }
     [Required]
-    [MaxLength(32)]
     public WordTypeEnum Type { get; set; }
     [Required]
     public bool IsLearned { get; set; }
     [Required]
-    [Column(TypeName = "CHAR(2)")]
     public WordLevelEnum Level { get; set; }
 
 }
