@@ -17,5 +17,5 @@ public class Dictionary
     [Required]
     [MaxLength(32)]
     public string TargetLanguage { get; set; }
-    public ICollection<Word> Words { get; set; }
+    public ICollection<Word>? Words { get; set; }
 }
