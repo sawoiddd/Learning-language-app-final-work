@@ -20,6 +20,7 @@ public class Word
     public bool IsLearned { get; set; }
     [Required]
     public WordLevelEnum Level { get; set; }
+    [Required]
     public int DictionaryID { get; set; }
     [ForeignKey(nameof(DictionaryID))]
     public Dictionary Dictionary { get; set; }
