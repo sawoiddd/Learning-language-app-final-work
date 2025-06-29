@@ -424,3 +424,4 @@ fabric.properties
 .idea/
 *.sln.iml
 
+**/appsettings.json
