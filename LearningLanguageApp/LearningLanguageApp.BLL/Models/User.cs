@@ -10,11 +10,11 @@ public class User
     [Required]
     [MaxLength(32)]
     public string FirstName { get; set; }
-    [MaxLength(32)]
     [Required]
+    [MaxLength(32)]
     public string LastName { get; set; }
-    [MaxLength(32)]
     [Required]
+    [MaxLength(32)]
     public string Login { get; set; }
     [Required]
     public string Password { get; set; }
