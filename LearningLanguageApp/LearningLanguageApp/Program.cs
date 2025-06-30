@@ -13,20 +13,14 @@ class Program
     static async Task Main(string[] args)
     {
         
-        var configJson = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: false)
-            .Build();
         
-        var token = configJson["Discord:DiscordToken"];
-        
+
         var configDiscord = new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.Guilds |
                              GatewayIntents.GuildMessages |
                              GatewayIntents.MessageContent
         };
-        //test guild id
-        var guildId = 1388512218152177766ul;
 
         
         

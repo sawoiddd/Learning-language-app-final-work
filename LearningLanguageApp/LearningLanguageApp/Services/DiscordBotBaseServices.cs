@@ -1,6 +1,7 @@
 
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 
 namespace LearningLanguageApp;
 
@@ -8,6 +9,31 @@ public class DiscordBotBaseServices
 {
     private DiscordSocketClient _discordClient;
     private ulong _guildId;
+    
+    private IConfiguration _configuration;
+
+
+    public DiscordBotBaseServices()
+    {
+        var configDiscord = new DiscordSocketConfig
+        {
+            GatewayIntents = GatewayIntents.Guilds |
+                             GatewayIntents.GuildMessages |
+                             GatewayIntents.MessageContent
+        };
+        
+        var configJson = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+        
+        var token = configJson["DiscordSettings:Api"];
+        var guildId = ulong.Parse(configJson["DiscordSettings:GuildId"]);
+    }
+
+    public async Task InitializeAsync()
+    {
+        
+    }
 
     public DiscordBotBaseServices(DiscordSocketClient discordClient, ulong guildId)
     {
@@ -68,7 +94,6 @@ public class DiscordBotBaseServices
             .AddOption("word", ApplicationCommandOptionType.String, "word with original language", isRequired: true)
             .AddOption("type",  ApplicationCommandOptionType.String, "type of word (noun, verb…)", isRequired: true)
             .AddOption("level", ApplicationCommandOptionType.String, "Level of word (A1, A2, B2…)", isRequired: false)
-            //.AddOption("original language", ApplicationCommandOptionType.String, "1", isRequired: false)
             .Build();
 
         var deleteWordCommand = new SlashCommandBuilder()
