@@ -24,4 +24,5 @@ public class User
     public DateTime CreateAt { get; set; }
     [Required]
     public DateTime UpdateAt{ get; set; }
+    public ICollection<Dictionary> Dictionaries { get; set; }
 }
