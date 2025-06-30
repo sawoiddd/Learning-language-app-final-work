@@ -5,9 +5,9 @@ namespace LearningLanguageApp.BLL.Interfaces.Repositories;
 
 public interface IWordRepository
 {
-    Task<Word> AddWordAsync(AddWordDto word);
-    Task<Word> UpdateWordAsync(Word word);
-    Task<string> DeleteWordAsync(int wordId);
-    Task<string> LearnWordAsync(int wordId);
-    Task<string> GetTranslateAsync(string word);
+    Task<Word> AddWordAsync(int dictionaryId, AddWordDto word, CancellationToken cancellationToken);
+    Task<Word> UpdateWordAsync(Word word, CancellationToken cancellationToken);
+    Task<Word> DeleteWordAsync(int wordId, CancellationToken cancellationToken);
+    Task<Word> LearnWordAsync(int wordId, CancellationToken cancellationToken);
+    Task<IEnumerable<Word>> GetWordsByDictionaryAsync(int dictionaryId, CancellationToken cancellationToken);
 }
