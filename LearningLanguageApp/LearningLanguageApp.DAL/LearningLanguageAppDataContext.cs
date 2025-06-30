@@ -7,9 +7,14 @@ namespace LearningLanguageApp.DAL;
 
 public class LearningLanguageAppDataContext: DbContext
 {
+    private readonly string _connectionString;
+    public LearningLanguageAppDataContext(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
     override protected void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=LearningLanguageAppDB;Integrated Security=True");
+        optionsBuilder.UseSqlServer(_connectionString);
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
