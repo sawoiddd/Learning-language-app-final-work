@@ -21,7 +21,7 @@ public class Word
     [Required]
     public WordLevelEnum Level { get; set; }
     [Required]
-    public int UserId { get; set; }
-    [ForeignKey(nameof(UserId))]
-    public User User { get; set; }
+    public int DictionaryID { get; set; }
+    [ForeignKey(nameof(DictionaryID))]
+    public Dictionary Dictionary { get; set; }
 }
