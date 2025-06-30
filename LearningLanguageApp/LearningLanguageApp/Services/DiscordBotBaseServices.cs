@@ -7,38 +7,48 @@ namespace LearningLanguageApp;
 
 public class DiscordBotBaseServices
 {
-    private DiscordSocketClient _discordClient;
-    private ulong _guildId;
+    private readonly DiscordSocketClient _discordClient;
+    private  readonly DiscordSocketConfig _configDiscord;
+    private readonly IConfigurationRoot _configJson;
     
-    private IConfiguration _configuration;
-
-
+    private readonly ulong _guildId;
+    private readonly string _tokenBot;
+    
+    
     public DiscordBotBaseServices()
     {
-        var configDiscord = new DiscordSocketConfig
+        _configDiscord = new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.Guilds |
                              GatewayIntents.GuildMessages |
                              GatewayIntents.MessageContent
         };
         
-        var configJson = new ConfigurationBuilder()
+        _configJson = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
         
-        var token = configJson["DiscordSettings:Api"];
-        var guildId = ulong.Parse(configJson["DiscordSettings:GuildId"]);
+        _tokenBot= _configJson["DiscordSettings:Api"];
+        _guildId = ulong.Parse(_configJson["DiscordSettings:GuildId"]);
+        
+        _discordClient = new DiscordSocketClient(_configDiscord);
+        
     }
 
     public async Task InitializeAsync()
     {
+        await _discordClient.LoginAsync(TokenType.Bot, _tokenBot);
+        await _discordClient.StartAsync();
         
     }
 
-    public DiscordBotBaseServices(DiscordSocketClient discordClient, ulong guildId)
+    public void EventsStart()
     {
-        _discordClient = discordClient;
-        _guildId = guildId;
+        _discordClient.Log += DiscordClient_Log;
+        _discordClient.MessageReceived += DiscordClient_MessageReceived;
+        _discordClient.Ready += DiscordClient_Ready;
+        _discordClient.SlashCommandExecuted += DiscordClient_SlashCommandExecuted;
+
     }
     
     public async Task DiscordClient_Log(LogMessage arg)
