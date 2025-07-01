@@ -1,5 +1,4 @@
-﻿using LearningLanguageApp.BLL.Dtos;
-using LearningLanguageApp.BLL.Interfaces.Repositories;
+﻿using LearningLanguageApp.BLL.Interfaces.Repositories;
 using LearningLanguageApp.BLL.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -25,8 +24,6 @@ public class WordRepository : IWordRepository
         _logger.Information("Word '{Word}' added to dictionary {DictionaryId}", word.OriginalWord, dictionaryId);
         return word;
     }
-
-
     public async Task<Word> UpdateWordAsync(Word word, CancellationToken cancellationToken)
     {
         var existing = await _context.Words.FindAsync(new object[] { word.Id }, cancellationToken)
@@ -43,7 +40,6 @@ public class WordRepository : IWordRepository
         _logger.Information("Word '{WordId}' updated", word.Id);
         return existing;
     }
-
     public async Task<Word> DeleteWordAsync(int wordId, CancellationToken cancellationToken)
     {
         var word = await _context.Words.FindAsync(new object[] { wordId }, cancellationToken)
@@ -55,10 +51,6 @@ public class WordRepository : IWordRepository
         _logger.Information("Word '{Word}' deleted", word.OriginalWord);
         return word;
     }
-
-
-
-
     public async Task<Word> LearnWordAsync(int wordId, CancellationToken cancellationToken)
     {
         var word = await _context.Words.FindAsync(new object[] { wordId }, cancellationToken)
@@ -70,8 +62,6 @@ public class WordRepository : IWordRepository
         _logger.Information("Word '{Word}' marked as learned", word.OriginalWord);
         return word;
     }
-
-
     public async Task<IEnumerable<Word>> GetWordsByDictionaryAsync(int dictionaryId, CancellationToken cancellationToken)
     {
         var words = await _context.Words

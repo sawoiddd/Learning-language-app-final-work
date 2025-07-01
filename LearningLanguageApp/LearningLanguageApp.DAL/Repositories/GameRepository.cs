@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LearningLanguageApp.BLL.Interfaces.Repositories;
+﻿using LearningLanguageApp.BLL.Interfaces.Repositories;
 using LearningLanguageApp.BLL.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;

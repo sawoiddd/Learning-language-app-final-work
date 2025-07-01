@@ -1,9 +1,10 @@
 using LearningLanguageApp.BLL.Interfaces.Repositories;
+using LearningLanguageApp.BLL.Interfaces.Services;
 using Serilog;
 
 namespace LearningLanguageApp.Services;
 
-public class GoogleTranslatorService : IGoogleTranslateRepository
+public class GoogleTranslatorService : IGoogleTranslateService
 {
     private readonly IWordRepository _wordRepository;
     private readonly IGoogleTranslateRepository  _googleTranslateRepository;
@@ -14,8 +15,8 @@ public class GoogleTranslatorService : IGoogleTranslateRepository
         _logger = logger;
         _googleTranslateRepository = googleTranslatorRepository;
     }
-    
-    public Task<string> GetWordTranslateAsync(string originalWord, string originalLanguage, string targetLanguage,
+
+    public Task<string> GetTranslateAsync(string originalWord, string originalLanguage, string targetLanguage,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(originalWord))
