@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Humanizer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
 using LearningLanguageApp.BLL.Models;
 
@@ -28,6 +29,5 @@ public class LearningLanguageAppDataContext: DbContext
     }
     public DbSet<Word> Words { get; set; }
     public DbSet<User> Users { get; set; }
-
 
 }
