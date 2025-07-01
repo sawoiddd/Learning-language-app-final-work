@@ -11,9 +11,11 @@ class Program
         await botBaseServices.InitializeAsync();
         botBaseServices.EventsStart();
         
-        Console.WriteLine("Hello Discord Bot");
+        Console.WriteLine("Discord bot has started and is ready");
 
         Console.ReadKey();
+
+        Console.WriteLine("Discord bot is now online!");
 
     }
 }

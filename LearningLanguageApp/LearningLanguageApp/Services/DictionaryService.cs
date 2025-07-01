@@ -1,4 +1,3 @@
-
 using LearningLanguageApp.BLL.Dtos;
 using LearningLanguageApp.BLL.Interfaces.Repositories;
 using LearningLanguageApp.BLL.Interfaces.Services;
@@ -22,9 +21,11 @@ public class DictionaryService : IDictionaryService
     {
         if (dictionaryId <= 0)
         {
+            _logger.Error($"Invalid dictionary id: {dictionaryId}");
             throw new Exception("Invalid dictionary id");
         }
         
+        _logger.Information($"Getting dictionary with id: {dictionaryId}");
         return _dictionaryRepository.GetDictionaryByIdAsync(dictionaryId, cancellationToken);
     }
 
@@ -32,9 +33,11 @@ public class DictionaryService : IDictionaryService
     {
         if (userId <= 0)
         {
+            _logger.Error($"Invalid user id: {userId}");
             throw new Exception("Invalid user id");
         }
         
+        _logger.Information($"Getting dictionaries for user with id: {userId}");
         return _dictionaryRepository.GetByUserDictionaryIdAsync(userId, cancellationToken);
     }
 
@@ -44,6 +47,7 @@ public class DictionaryService : IDictionaryService
 
         if (userId <= 0)
         {
+            _logger.Error($"Invalid user id: {userId}");
             throw new Exception("Invalid user id");
         }
 
@@ -55,6 +59,7 @@ public class DictionaryService : IDictionaryService
             Words = new List<Word>()
         };
         
+        _logger.Information($"Creating dictionary for user with id: {userId}, source language: {dto.SourceLanguage}, target language: {dto.TargetLanguage}");
         return _dictionaryRepository.AddDictionaryAsync(dict, cancellationToken);
         
     }
@@ -68,9 +73,9 @@ public class DictionaryService : IDictionaryService
             Id = dto.Id,
             SourceLanguage = dto.SourceLanguage,
             TargetLanguage = dto.TargetLanguage,
-            //adding words in DAL
         };
         
+        _logger.Information($"Updating dictionary with id: {dto.Id}, source language: {dto.SourceLanguage}, target language: {dto.TargetLanguage}");
         return _dictionaryRepository.UpdateDictionaryAsync(dict, cancellationToken);
     }
 
@@ -78,9 +83,11 @@ public class DictionaryService : IDictionaryService
     {
         if (dictionaryId <= 0)
         {
+            _logger.Error($"Invalid dictionary id");
             throw new Exception("Invalid dictionary id");
         }
         
+        _logger.Information($"Deleting dictionary with id: {dictionaryId}");
         return _dictionaryRepository.DeleteDictionaryAsync(dictionaryId, cancellationToken);
     }
     
@@ -88,11 +95,13 @@ public class DictionaryService : IDictionaryService
     {
         if (string.IsNullOrWhiteSpace(dtoAdd.SourceLanguage))
         {
+            _logger.Error("Source language could not be empty");
             throw new Exception("Source language could not be empty");
         }
             
         if (string.IsNullOrWhiteSpace(dtoAdd.TargetLanguage))
         {
+            _logger.Error("Target language could not be empty");
             throw new Exception("target language could not be empty");
         }
     }
@@ -101,18 +110,19 @@ public class DictionaryService : IDictionaryService
     {
         if (dtoUpd.Id <= 0)
         {
+            _logger.Error($"Invalid id: {dtoUpd.Id}");
             throw new Exception("Invalid id!");
         }
         if (string.IsNullOrWhiteSpace(dtoUpd.SourceLanguage))
         {
+            _logger.Error("Source language could not be empty");
             throw new Exception("Source language could not be empty");
         }
             
         if (string.IsNullOrWhiteSpace(dtoUpd.TargetLanguage))
         {
+            _logger.Error("target language could not be empty");
             throw new Exception("target language could not be empty");
-        }
-        
-        
+        } 
     }
 }

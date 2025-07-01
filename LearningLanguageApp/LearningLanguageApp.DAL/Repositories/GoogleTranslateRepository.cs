@@ -20,21 +20,21 @@ public class GoogleTranslateRepository : IGoogleTranslateRepository
 
         var response = await _httpClient.GetAsync(url, cancellationToken);
         if (!response.IsSuccessStatusCode)
+        {
+            _logger.Error($"Failed to translate word '{originalWord}' from '{originalLanguage}' to '{targetLanguage}'. Status code: {response.StatusCode}");
             throw new Exception("Translation failed");
+        }
 
         var jsonResponse = await response.Content.ReadAsStringAsync(cancellationToken);
-
 
         using var jsonDoc = JsonDocument.Parse(jsonResponse);
         var root = jsonDoc.RootElement;
 
-        if (root.ValueKind == JsonValueKind.Array &&
-        root.GetArrayLength() > 0 &&
-        root[0].ValueKind == JsonValueKind.Array &&
-        root[0].GetArrayLength() > 0 &&
-        root[0][0].ValueKind == JsonValueKind.Array &&
-        root[0][0].GetArrayLength() > 0)
+        if (root.ValueKind == JsonValueKind.Array && root.GetArrayLength() > 0 &&
+        root[0].ValueKind == JsonValueKind.Array && root[0].GetArrayLength() > 0 &&
+        root[0][0].ValueKind == JsonValueKind.Array && root[0][0].GetArrayLength() > 0)
         {
+            _logger.Information($"Successfully translated word '{originalWord}' from '{originalLanguage}' to '{targetLanguage}'");
             return root[0][0][0].GetString() ?? string.Empty;
         }
 
