@@ -6,7 +6,7 @@ namespace LearningLanguageApp;
 
 using Discord;
 using Discord.WebSocket;
-
+using LearningLanguageApp.DAL;
 
 class Program
 {
