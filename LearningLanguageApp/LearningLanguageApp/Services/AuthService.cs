@@ -1,79 +1,60 @@
+using LearningLanguageApp.BLL.Dtos;
 using LearningLanguageApp.BLL.Interfaces.Repositories;
+using LearningLanguageApp.BLL.Interfaces.Services;
 using LearningLanguageApp.BLL.Models;
 using Serilog;
 
 namespace LearningLanguageApp.Services;
 
-public class AuthService : IAuthRepository
+public class AuthService : IAuthSerivce
 {
-    private readonly IAuthRepository _iAuthRepository;
+    private readonly IAuthRepository _authRepository;
     private readonly ILogger _logger;
 
     public AuthService(IAuthRepository iAuthRepository,  ILogger logger)
     {
-        _iAuthRepository = iAuthRepository;
+        _authRepository = iAuthRepository;
         _logger = logger;
     }
-    
-    public Task<User> GetUserByLoginAsync(string login, CancellationToken cancellationToken)
+
+    public async Task<User> RegisterAsync(RegisterUserDto dto, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(login))
+        if (!await _authRepository.IsLoginUniqueAsync(dto.Login, cancellationToken))
         {
-            throw new Exception ("Login cannot be empty");
-        }
-        
-        return  _iAuthRepository.GetUserByLoginAsync(login, cancellationToken);
-    }
-
-    public Task<bool> IsLoginUniqueAsync(string login, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(login))
-        {
-            throw new Exception ("Login cannot be empty");
-        }
-        
-        return _iAuthRepository.IsLoginUniqueAsync(login, cancellationToken);
-    }
-
-    public Task<User> AddUserAsync(User user, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(user.Login))
-        {
-            throw new Exception ("Login cannot be empty");
+            _logger.Error($"Register attempt with non-unique login: {dto.Login}");
+            throw new InvalidOperationException("Login is already taken.");
         }
 
-        if (string.IsNullOrWhiteSpace(user.Password))
+        var user = new User
         {
-            throw new Exception ("Password cannot be empty");
-        }
-
-        if (string.IsNullOrWhiteSpace(user.FirstName))
-        {
-            throw new Exception ("First name cannot be empty");
-        }
-
-        if (string.IsNullOrWhiteSpace(user.LastName))
-        {
-            throw new Exception ("Last name cannot be empty");
-        }
-
-        if (user.BirthdayDate >= DateTime.Today)
-        {
-            throw new Exception ("Birthday date is invalid");
-        }
-
-        var userNew = new User
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            BirthdayDate = user.BirthdayDate,
-            Login = user.Login,
-            Password = user.Password,
-            CreateAt = DateTime.Now,
-            UpdateAt = DateTime.Now
+            Login = dto.Login,
+            BirthdayDate = dto.BirthdayDate,
+            CreateAt = DateTime.UtcNow,
+            UpdateAt = DateTime.UtcNow,
+            Dictionaries = new List<Dictionary>(),
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            Password = BCrypt.Net.BCrypt.HashPassword(dto.Password)
         };
-        
-        return _iAuthRepository.AddUserAsync(userNew, cancellationToken);
 
+        return await _authRepository.AddUserAsync(user, cancellationToken);
+    }
+
+    public async Task<User> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken)
+    {
+        var user = await _authRepository.GetUserByLoginAsync(dto.Login, cancellationToken);
+        if (user == null)
+        {
+            _logger.Error($"Login failed. User not found: {dto.Login}");
+            throw new KeyNotFoundException("Invalid login or password.");
+        }
+        if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
+        {
+            _logger.Error($"Login failed. Incorrect password for user: {dto.Login}");
+            throw new UnauthorizedAccessException("Invalid login or password.");
+        }
+
+        _logger.Information($"User logged in: {dto.Login}");
+        return user;
     }
 }

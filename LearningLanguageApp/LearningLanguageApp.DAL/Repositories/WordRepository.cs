@@ -28,10 +28,11 @@ public class WordRepository : IWordRepository
     public async Task<Word> UpdateWordAsync(Word word, CancellationToken cancellationToken)
     {
         var existing = await _context.Words.FindAsync(word.Id, cancellationToken);
+
         if (existing == null)
         {
             _logger.Error($"Word with ID {word.Id} not found for update");
-            throw new KeyNotFoundException($"Word with ID {word.Id} not found");
+            return null;
         }
 
         existing.OriginalWord = word.OriginalWord;
@@ -48,10 +49,11 @@ public class WordRepository : IWordRepository
     public async Task<Word> DeleteWordAsync(int wordId, CancellationToken cancellationToken)
     {
         var word = await _context.Words.FindAsync(wordId, cancellationToken);
+
         if (word == null)
         {
             _logger.Error($"Word with ID {wordId} not found for deletion");
-            throw new KeyNotFoundException($"Word with ID {wordId} not found");
+            return null;
         }
 
         _context.Words.Remove(word);
@@ -66,7 +68,7 @@ public class WordRepository : IWordRepository
         if (word == null)
         {
             _logger.Error($"Word with ID {wordId} not found for learning");
-            throw new KeyNotFoundException($"Word with ID {wordId} not found");
+            return null;
         }   
 
         word.IsLearned = true;
@@ -79,6 +81,12 @@ public class WordRepository : IWordRepository
     {
         var words = await _context.Words.Where(w => w.DictionaryID == dictionaryId)
             .ToListAsync(cancellationToken);
+
+        if (words == null || !words.Any())
+        {
+            _logger.Error($"No words found in dictionary {dictionaryId}");
+            return null;
+        }
 
         _logger.Information($"Retrieved {words.Count} words from dictionary {dictionaryId}");
         return words;

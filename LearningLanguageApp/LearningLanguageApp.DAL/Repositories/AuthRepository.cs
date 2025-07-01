@@ -25,15 +25,15 @@ public class AuthRepository : IAuthRepository
         return user;
     }
 
-    public Task<User> GetUserByLoginAsync(string login, CancellationToken cancellationToken)
+    public async Task<User> GetUserByLoginAsync(string login, CancellationToken cancellationToken)
     {
-        var user = _context.Users.AsNoTracking()
+        var user = await _context.Users.AsNoTracking()
             .FirstOrDefaultAsync(u => u.Login == login, cancellationToken);
 
-        if (user == null)
+        if(user == null)
         {
             _logger.Error($"User with login {login} not found.");
-            throw new KeyNotFoundException($"User with login {login} not found.");
+            return null;
         }
 
         _logger.Information($"User retrieved: {login}");

@@ -15,7 +15,7 @@ public class GoogleTranslatorService : IGoogleTranslateService
         _googleTranslateRepository = googleTranslatorRepository;
     }
 
-    public Task<string> GetTranslateAsync(string originalWord, string originalLanguage, string targetLanguage,
+    public async Task<string> GetTranslateAsync(string originalWord, string originalLanguage, string targetLanguage,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(originalWord))
@@ -36,7 +36,15 @@ public class GoogleTranslatorService : IGoogleTranslateService
             throw new Exception("The target language cannot be null or empty.");
         }
         
+        var result = await _googleTranslateRepository.GetWordTranslateAsync(originalWord, originalLanguage, targetLanguage, cancellationToken);
+
+        if (string.IsNullOrEmpty(result))
+        {
+            _logger.Error($"Translation failed for word '{originalWord}' from '{originalLanguage}' to '{targetLanguage}'");
+            throw new Exception("Translation failed");
+        }
+
         _logger.Information($"Translating word '{originalWord}' from '{originalLanguage}' to '{targetLanguage}'");
-        return _googleTranslateRepository.GetWordTranslateAsync(originalWord, originalLanguage, targetLanguage, cancellationToken);
+        return result;
     }
 }

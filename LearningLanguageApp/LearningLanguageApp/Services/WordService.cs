@@ -37,7 +37,7 @@ public class WordService :  IWordService
         return _wordRepository.AddWordAsync(dictionaryId, word, cancellationToken);
     }
     
-    public Task<Word> UpdateWordAsync(UpdateWordDto word, CancellationToken cancellationToken)
+    public async Task<Word> UpdateWordAsync(UpdateWordDto word, CancellationToken cancellationToken)
     {
         ValidationUpdDto(word);
         
@@ -51,11 +51,19 @@ public class WordService :  IWordService
             DictionaryID = -1
         };
 
+        var result = await _wordRepository.UpdateWordAsync(updatedWord,  cancellationToken);
+
+        if (result == null)
+        {
+            _logger.Error($"Failed to update word with ID: {word.Id}");
+            throw new Exception($"Word with ID {word.Id} not found for update");
+        }
+
         _logger.Information($"Updating word with ID: {word.Id}, Original Word: {word.OriginalWord}");
-        return _wordRepository.UpdateWordAsync(updatedWord,  cancellationToken);   
+        return result;
     }
 
-    public Task<Word> DeleteWordAsync(int wordId, CancellationToken cancellationToken)
+    public async Task<Word> DeleteWordAsync(int wordId, CancellationToken cancellationToken)
     {
         if (wordId <= 0)
         {
@@ -63,11 +71,19 @@ public class WordService :  IWordService
             throw new Exception("Word id is invalid");
         }
 
+        var result = await _wordRepository.DeleteWordAsync(wordId, cancellationToken);
+
+        if (result == null)
+        {
+            _logger.Error($"Failed to delete word with ID: {wordId}");
+            throw new Exception($"Word with ID {wordId} not found for deletion");
+        }
+
         _logger.Information($"Deleting word with id: {wordId}");
-        return _wordRepository.DeleteWordAsync(wordId, cancellationToken);
+        return result;
     }
 
-    public Task<Word> MarkAsLearnedAsync(int wordId, CancellationToken cancellationToken)
+    public async Task<Word> MarkAsLearnedAsync(int wordId, CancellationToken cancellationToken)
     {
         if (wordId <= 0)
         {
@@ -75,11 +91,19 @@ public class WordService :  IWordService
             throw new Exception("Word id is invalid");
         }
     
-        _logger.Information($"Marking word with id {wordId} as learned");
-        return _wordRepository.LearnWordAsync(wordId, cancellationToken);
+        var result = await _wordRepository.LearnWordAsync(wordId, cancellationToken);
+
+        if (result == null)
+        {
+            _logger.Error($"Failed to mark word with ID: {wordId} as learned");
+            throw new Exception($"Word with ID {wordId} not found for learning");
+        }
+
+        _logger.Information($"Word with id {wordId} marked as learned");
+        return result;
     }
 
-    public Task<IEnumerable<Word>> GetWordsAsync(int dictionaryId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Word>> GetWordsAsync(int dictionaryId, CancellationToken cancellationToken)
     {
         if (dictionaryId <= 0)
         {
@@ -87,8 +111,16 @@ public class WordService :  IWordService
             throw new Exception("Dictionary ID is invalid");
         }
         
+        var result = await _wordRepository.GetWordsByDictionaryAsync(dictionaryId, cancellationToken);
+
+        if (result == null || !result.Any())
+        {
+            _logger.Error($"Failed to find words in dictionary with ID: {dictionaryId}");
+            throw new KeyNotFoundException($"No words found for dictionary with ID: {dictionaryId}");
+        }
+
         _logger.Information($"Retrieving words for dictionary with ID: {dictionaryId}");
-        return _wordRepository.GetWordsByDictionaryAsync(dictionaryId, cancellationToken);        
+        return result;
     }
     
     private void ValidationAddDto(AddWordDto dtoAdd)
@@ -117,7 +149,6 @@ public class WordService :  IWordService
             throw new Exception("This isn't a valid level");
         }
     }
-
     private void ValidationUpdDto(UpdateWordDto dtoUpd)
     {
         if (dtoUpd.Id <= 0)

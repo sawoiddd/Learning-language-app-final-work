@@ -31,8 +31,8 @@ public class DictionaryRepository : IDictionaryRepository
 
         if (entity == null)
         {
-            _logger.Error("Dictionary with Id {DictionaryId} not found for deletion", dictionaryId);
-            throw new KeyNotFoundException($"Dictionary with ID {dictionaryId} not found");
+            _logger.Error($"Dictionary with Id {dictionaryId} not found for deletion");
+            return null;
         }
 
         _context.Dictionaries.Remove(entity);
@@ -47,6 +47,12 @@ public class DictionaryRepository : IDictionaryRepository
         var result = await _context.Dictionaries.Where(d => d.UserId == userId)
            .ToListAsync(cancellationToken);
 
+        if (result == null || !result.Any())
+        {
+            _logger.Error($"No dictionaries found for UserId {userId}");
+            return null;
+        }
+
         _logger.Information($"Found {result.Count} dictionaries for UserId {userId}");
         return result;
     }
@@ -59,8 +65,8 @@ public class DictionaryRepository : IDictionaryRepository
 
         if (dictionary == null)
         {
-            _logger.Error("Dictionary with Id {DictionaryId} not found", dictionaryId);
-            throw new KeyNotFoundException($"Dictionary with ID {dictionaryId} not found");
+            _logger.Error($"Dictionary with Id {dictionaryId} not found");
+            return null;
         }
 
         _logger.Information($"Retrieving dictionary with Id {dictionaryId}");
@@ -73,8 +79,8 @@ public class DictionaryRepository : IDictionaryRepository
 
         if (existing == null)
         {
-            _logger.Warning("Dictionary with Id {DictionaryId} not found for update", dictionary.Id);
-            throw new KeyNotFoundException($"Dictionary with ID {dictionary.Id} not found");
+            _logger.Error($"Dictionary with Id {dictionary.Id} not found for update");
+            return null;
         }
 
         existing.SourceLanguage = dictionary.SourceLanguage;

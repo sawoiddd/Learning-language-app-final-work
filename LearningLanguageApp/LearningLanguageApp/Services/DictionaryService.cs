@@ -17,7 +17,7 @@ public class DictionaryService : IDictionaryService
         _logger = logger;
     }
     
-    public Task<Dictionary> GetDictionaryByIdAsync(int dictionaryId, CancellationToken cancellationToken)
+    public async Task<Dictionary> GetDictionaryByIdAsync(int dictionaryId, CancellationToken cancellationToken)
     {
         if (dictionaryId <= 0)
         {
@@ -25,11 +25,19 @@ public class DictionaryService : IDictionaryService
             throw new Exception("Invalid dictionary id");
         }
         
+        var dictionary = await _dictionaryRepository.GetDictionaryByIdAsync(dictionaryId, cancellationToken);
+
+        if (dictionary == null)
+        {
+            _logger.Error($"Failed to find dictionary with id {dictionaryId}");
+            throw new KeyNotFoundException($"Dictionary with Id {dictionaryId} not found");
+        }
+
         _logger.Information($"Getting dictionary with id: {dictionaryId}");
-        return _dictionaryRepository.GetDictionaryByIdAsync(dictionaryId, cancellationToken);
+        return dictionary;
     }
 
-    public Task<IEnumerable<Dictionary>> GetUserDictionariesAsync(int userId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Dictionary>> GetUserDictionariesAsync(int userId, CancellationToken cancellationToken)
     {
         if (userId <= 0)
         {
@@ -37,8 +45,16 @@ public class DictionaryService : IDictionaryService
             throw new Exception("Invalid user id");
         }
         
+        var result = await _dictionaryRepository.GetByUserDictionaryIdAsync(userId, cancellationToken);
+
+        if (result == null)
+        {
+            _logger.Error($"Failed to find dictionaries for user with id: {userId}");
+            throw new KeyNotFoundException($"No dictionaries found for UserId: {userId}");
+        }
+
         _logger.Information($"Getting dictionaries for user with id: {userId}");
-        return _dictionaryRepository.GetByUserDictionaryIdAsync(userId, cancellationToken);
+        return result;
     }
 
     public Task<Dictionary> CreateDictionaryAsync(AddDictionaryDto dto, int userId, CancellationToken cancellationToken)
@@ -58,13 +74,11 @@ public class DictionaryService : IDictionaryService
             TargetLanguage = dto.TargetLanguage,
             Words = new List<Word>()
         };
-        
-        _logger.Information($"Creating dictionary for user with id: {userId}, source language: {dto.SourceLanguage}, target language: {dto.TargetLanguage}");
-        return _dictionaryRepository.AddDictionaryAsync(dict, cancellationToken);
-        
+
+        return _dictionaryRepository.AddDictionaryAsync(dict, cancellationToken);       
     }
 
-    public Task<Dictionary> UpdateDictionaryAsync(UpdateDictionaryDto dto, CancellationToken cancellationToken)
+    public async Task<Dictionary> UpdateDictionaryAsync(UpdateDictionaryDto dto, CancellationToken cancellationToken)
     {
         ValidationUpdDto(dto);
 
@@ -74,12 +88,20 @@ public class DictionaryService : IDictionaryService
             SourceLanguage = dto.SourceLanguage,
             TargetLanguage = dto.TargetLanguage,
         };
-        
+
+        var dictionary = await _dictionaryRepository.UpdateDictionaryAsync(dict, cancellationToken);
+
+        if (dictionary == null)
+        {
+            _logger.Error($"Failed to update dictionary with id: {dto.Id}");
+            throw new Exception($"Dictionary with Id {dictionary.Id} not found for update");
+        }
+
         _logger.Information($"Updating dictionary with id: {dto.Id}, source language: {dto.SourceLanguage}, target language: {dto.TargetLanguage}");
-        return _dictionaryRepository.UpdateDictionaryAsync(dict, cancellationToken);
+        return dictionary;
     }
 
-    public Task<Dictionary> DeleteDictionaryAsync(int dictionaryId, CancellationToken cancellationToken)
+    public async Task<Dictionary> DeleteDictionaryAsync(int dictionaryId, CancellationToken cancellationToken)
     {
         if (dictionaryId <= 0)
         {
@@ -87,8 +109,16 @@ public class DictionaryService : IDictionaryService
             throw new Exception("Invalid dictionary id");
         }
         
+        var dictionary = await _dictionaryRepository.DeleteDictionaryAsync(dictionaryId, cancellationToken);
+
+        if (dictionary == null)
+        {
+            _logger.Error($"Failed to delete dictionary with id {dictionaryId}");
+            throw new KeyNotFoundException($"Dictionary with Id {dictionaryId} not found for deletion");
+        }
+
         _logger.Information($"Deleting dictionary with id: {dictionaryId}");
-        return _dictionaryRepository.DeleteDictionaryAsync(dictionaryId, cancellationToken);
+        return dictionary;
     }
     
     private void ValidationAddDto(AddDictionaryDto dtoAdd)
