@@ -1,14 +1,17 @@
 using LearningLanguageApp.BLL.Interfaces.Repositories;
+using Serilog;
 
 namespace LearningLanguageApp.Services;
 
 public class GoogleTranslatorService : IGoogleTranslateRepository
 {
     private readonly IWordRepository _wordRepository;
-    
     private readonly IGoogleTranslateRepository  _googleTranslateRepository;
-    public GoogleTranslatorService(IGoogleTranslateRepository googleTranslatorRepository)
+    private readonly ILogger _logger;
+
+    public GoogleTranslatorService(IGoogleTranslateRepository googleTranslatorRepository, ILogger logger)
     {
+        _logger = logger;
         _googleTranslateRepository = googleTranslatorRepository;
     }
     

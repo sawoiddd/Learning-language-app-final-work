@@ -1,18 +1,12 @@
-﻿using System.Text.Json;
-using LearningLanguageApp.Services;
-using Microsoft.Extensions.Configuration;
+﻿using LearningLanguageApp.Services;
 
 namespace LearningLanguageApp;
-
-using Discord;
-using Discord.WebSocket;
-using LearningLanguageApp.DAL;
 
 class Program
 {
     static async Task Main(string[] args)
     {
-        var botBaseServices = new DiscordBotBaseServices();
+        var botBaseServices = new DiscordBotBaseServices(LoggerService.GetLogger());
 
         await botBaseServices.InitializeAsync();
         botBaseServices.EventsStart();

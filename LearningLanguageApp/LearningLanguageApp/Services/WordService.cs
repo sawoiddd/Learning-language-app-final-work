@@ -2,20 +2,21 @@ using LearningLanguageApp.BLL.Dtos;
 using LearningLanguageApp.BLL.Enums;
 using LearningLanguageApp.BLL.Interfaces.Repositories;
 using LearningLanguageApp.BLL.Interfaces.Services;
-using LearningLanguageApp.DAL;
 using LearningLanguageApp.BLL.Models;
 using Exception = System.Exception;
+using Serilog;
 
 namespace LearningLanguageApp.Services;
 
 public class WordService :  IWordService
 {
     private readonly IWordRepository _wordRepository;
-    private readonly LearningLanguageAppDataContext _context;
+    private readonly ILogger _logger;
 
 
-    public WordService(IWordRepository iWordRepository)
+    public WordService(IWordRepository iWordRepository, ILogger logger)
     {
+        _logger = logger;
         _wordRepository = iWordRepository;
     }
     
