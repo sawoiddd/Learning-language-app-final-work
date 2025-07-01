@@ -13,7 +13,7 @@ public class GameService : IGameSerivce
 
     private IList<Word> _currentWords;
 
-    private const int _countOfWords = 10;
+    private const int CountOfWords = 10;
 
 
     public GameService(IGameRepository gameRepository)
@@ -29,7 +29,7 @@ public class GameService : IGameSerivce
             throw new Exception("Invalid dictionary id");
         }
         
-        _currentWords = await _gameRepository.GetRandomWordsByDictionaryAsync(dictionaryId, _countOfWords, cancellationToken);
+        _currentWords = await _gameRepository.GetRandomWordsByDictionaryAsync(dictionaryId, CountOfWords, cancellationToken);
         return _currentWords;
     }
 
