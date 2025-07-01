@@ -1,8 +1,5 @@
 using Discord;
 using Discord.WebSocket;
-using LearningLanguageApp.BLL.Dtos;
-using LearningLanguageApp.BLL.Enums;
-using LearningLanguageApp.BLL.Models;
 using LearningLanguageApp.Services;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -36,15 +33,13 @@ public class DiscordBotBaseServices
         _tokenBot= _configJson["DiscordSettings:Api"];
         _guildId = ulong.Parse(_configJson["DiscordSettings:GuildId"]);
         
-        _discordClient = new DiscordSocketClient(_configDiscord);
-        
+        _discordClient = new DiscordSocketClient(_configDiscord); 
     }
 
     public async Task InitializeAsync()
     {
         await _discordClient.LoginAsync(TokenType.Bot, _tokenBot);
         await _discordClient.StartAsync();
-        
     }
 
     public void EventsStart()
@@ -53,7 +48,6 @@ public class DiscordBotBaseServices
         _discordClient.MessageReceived += DiscordClient_MessageReceived;
         _discordClient.Ready += DiscordClient_Ready;
         _discordClient.SlashCommandExecuted += DiscordClient_SlashCommandExecuted;
-
     }
     
     public async Task DiscordClient_Log(LogMessage arg)
@@ -70,11 +64,6 @@ public class DiscordBotBaseServices
     
     public async Task DiscordClient_SlashCommandExecuted(SocketSlashCommand arg)
     {
-
-        var wordService = Dependency.GetWordService();
-
-
-
         switch (arg.CommandName)
         {
             case "add_word":
@@ -107,7 +96,6 @@ public class DiscordBotBaseServices
     
     public async Task DiscordClient_Ready()
     {
-
         var addWordCommand = new SlashCommandBuilder()
             .WithName("add_word")
             .WithDescription("Add word to dictionary")
@@ -143,7 +131,7 @@ public class DiscordBotBaseServices
             .WithDescription("show all words")
             .Build();
         
-var loginUserCommand = new SlashCommandBuilder()
+        var loginUserCommand = new SlashCommandBuilder()
             .WithName("login_user")
             .WithDescription("login user")
             .AddOption("login", ApplicationCommandOptionType.String, "enter login", isRequired: true)

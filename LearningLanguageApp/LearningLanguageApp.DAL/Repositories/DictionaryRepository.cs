@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LearningLanguageApp.BLL.Interfaces.Repositories;
+﻿using LearningLanguageApp.BLL.Interfaces.Repositories;
 using LearningLanguageApp.BLL.Models;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -23,68 +18,71 @@ public class DictionaryRepository : IDictionaryRepository
 
     public async Task<Dictionary> AddDictionaryAsync(Dictionary dictionary, CancellationToken cancellationToken)
     {
-        _logger.Information("Adding dictionary for UserId {UserId}", dictionary.UserId);
-        await _context.Dictionaries.AddAsync(dictionary, cancellationToken);
+        _context.Dictionaries.Add(dictionary);
         await _context.SaveChangesAsync(cancellationToken);
-        _logger.Information("Added dictionary with Id {DictionaryId}", dictionary.Id);
+
+        _logger.Information($"Added dictionary with Id {dictionary.Id} to user by id: {dictionary.UserId}");
         return dictionary;
     }
 
     public async Task<Dictionary> DeleteDictionaryAsync(int dictionaryId, CancellationToken cancellationToken)
     {
-        var entity = await _context.Dictionaries.FindAsync(new object[] { dictionaryId }, cancellationToken);
+        var entity = await _context.Dictionaries.FindAsync(dictionaryId, cancellationToken);
+
         if (entity == null)
         {
-            _logger.Warning("Dictionary with Id {DictionaryId} not found for deletion", dictionaryId);
-            return null;
+            _logger.Error("Dictionary with Id {DictionaryId} not found for deletion", dictionaryId);
+            throw new KeyNotFoundException($"Dictionary with ID {dictionaryId} not found");
         }
 
         _context.Dictionaries.Remove(entity);
         await _context.SaveChangesAsync(cancellationToken);
+
         _logger.Information("Deleted dictionary with Id {DictionaryId}", dictionaryId);
         return entity;
     }
 
     public async Task<IEnumerable<Dictionary>> GetByUserDictionaryIdAsync(int userId, CancellationToken cancellationToken)
     {
-        _logger.Information("Retrieving dictionaries for UserId {UserId}", userId);
-        var list = await _context.Dictionaries
-           .Where(d => d.UserId == userId)
+        var result = await _context.Dictionaries.Where(d => d.UserId == userId)
            .ToListAsync(cancellationToken);
-        _logger.Information("Found {Count} dictionaries for UserId {UserId}", list.Count, userId);
-        return list;        
+
+        _logger.Information($"Found {result.Count} dictionaries for UserId {userId}");
+        return result;
     }
 
     public async Task<Dictionary> GetDictionaryByIdAsync(int dictionaryId, CancellationToken cancellationToken)
     {
-        var dictionary = await _context.Dictionaries
-            .Include(d => d.Words)
+        var dictionary = await _context.Dictionaries.Include(d => d.Words)
+            .AsNoTracking()
             .FirstOrDefaultAsync(d => d.Id == dictionaryId, cancellationToken);
+
         if (dictionary == null)
         {
-            _logger.Warning("Dictionary with Id {DictionaryId} not found", dictionaryId);
-            return null;
+            _logger.Error("Dictionary with Id {DictionaryId} not found", dictionaryId);
+            throw new KeyNotFoundException($"Dictionary with ID {dictionaryId} not found");
         }
-        _logger.Information("Retrieving dictionary with Id {DictionaryId}", dictionaryId);
+
+        _logger.Information($"Retrieving dictionary with Id {dictionaryId}");
         return dictionary;
     }
 
     public async Task<Dictionary> UpdateDictionaryAsync(Dictionary dictionary, CancellationToken cancellationToken)
     {
-        _logger.Information("Updating dictionary with Id {DictionaryId}", dictionary.Id);
-        var existing = await _context.Dictionaries.FindAsync(new object[] { dictionary.Id }, cancellationToken);
+        var existing = await _context.Dictionaries.FindAsync(dictionary.Id, cancellationToken);
+
         if (existing == null)
         {
             _logger.Warning("Dictionary with Id {DictionaryId} not found for update", dictionary.Id);
             throw new KeyNotFoundException($"Dictionary with ID {dictionary.Id} not found");
         }
+
         existing.SourceLanguage = dictionary.SourceLanguage;
         existing.TargetLanguage = dictionary.TargetLanguage;
 
-        // Word update logic(TEST)
-
         _context.Dictionaries.Update(existing);
         await _context.SaveChangesAsync(cancellationToken);
+
         _logger.Information("Updated dictionary with Id {DictionaryId}", dictionary.Id);
         return existing;
     }

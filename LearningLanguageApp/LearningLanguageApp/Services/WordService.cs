@@ -13,7 +13,6 @@ public class WordService :  IWordService
     private readonly IWordRepository _wordRepository;
     private readonly ILogger _logger;
 
-
     public WordService(IWordRepository iWordRepository, ILogger logger)
     {
         _logger = logger;
@@ -23,72 +22,72 @@ public class WordService :  IWordService
     public Task<Word> AddWordAsync(int dictionaryId, AddWordDto dto, CancellationToken cancellationToken)
     {
         ValidationAddDto(dto);
-        
-            var word = new Word()
-            {
-                OriginalWord = dto.OriginalWord,
-                Translation = dto.Translation,
-                Type = dto.Type,
-                Level = dto.Level,
-                IsLearned = false,
-                DictionaryID = dictionaryId,
-                
-            };
-        
-            return _wordRepository.AddWordAsync(dictionaryId, word, cancellationToken);
+
+        var word = new Word()
+        {
+            OriginalWord = dto.OriginalWord,
+            Translation = dto.Translation,
+            Type = dto.Type,
+            Level = dto.Level,
+            IsLearned = false,
+            DictionaryID = dictionaryId,
+        };
+
+        _logger.Information($"Adding word '{word.OriginalWord}' to dictionary with ID: {dictionaryId}");
+        return _wordRepository.AddWordAsync(dictionaryId, word, cancellationToken);
     }
     
-
     public Task<Word> UpdateWordAsync(UpdateWordDto word, CancellationToken cancellationToken)
     {
         ValidationUpdDto(word);
         
-        
-        var updatedWord = new Word
-            {
-                Id = word.Id,
-                OriginalWord = word.OriginalWord,
-                IsLearned = false,
-                Type = word.Type,
-                Level = word.Level,
-                DictionaryID = -1 
-            }; 
-        return _wordRepository.UpdateWordAsync(updatedWord,  cancellationToken);
-            
+        var updatedWord = new Word()
+        {
+            Id = word.Id,
+            OriginalWord = word.OriginalWord,
+            IsLearned = false,
+            Type = word.Type,
+            Level = word.Level,
+            DictionaryID = -1
+        };
+
+        _logger.Information($"Updating word with ID: {word.Id}, Original Word: {word.OriginalWord}");
+        return _wordRepository.UpdateWordAsync(updatedWord,  cancellationToken);   
     }
 
     public Task<Word> DeleteWordAsync(int wordId, CancellationToken cancellationToken)
     {
-            if (wordId <= 0)
-            {
-                throw new Exception("Word id is invalid");
-            }
-            
-            return _wordRepository.DeleteWordAsync(wordId, cancellationToken);
+        if (wordId <= 0)
+        {
+            _logger.Error($"Word id is invalid: {wordId}");
+            throw new Exception("Word id is invalid");
+        }
+
+        _logger.Information($"Deleting word with id: {wordId}");
+        return _wordRepository.DeleteWordAsync(wordId, cancellationToken);
     }
 
     public Task<Word> MarkAsLearnedAsync(int wordId, CancellationToken cancellationToken)
     {
-
         if (wordId <= 0)
         {
+            _logger.Error($"Word id is invalid: {wordId}");
             throw new Exception("Word id is invalid");
         }
     
+        _logger.Information($"Marking word with id {wordId} as learned");
         return _wordRepository.LearnWordAsync(wordId, cancellationToken);
     }
-    
-        
-    
 
     public Task<IEnumerable<Word>> GetWordsAsync(int dictionaryId, CancellationToken cancellationToken)
     {
-        
         if (dictionaryId <= 0)
         {
+            _logger.Error($"Dictionary ID is invalid: {dictionaryId}");
             throw new Exception("Dictionary ID is invalid");
         }
         
+        _logger.Information($"Retrieving words for dictionary with ID: {dictionaryId}");
         return _wordRepository.GetWordsByDictionaryAsync(dictionaryId, cancellationToken);        
     }
     
@@ -96,47 +95,60 @@ public class WordService :  IWordService
     {
         if (string.IsNullOrWhiteSpace(dtoAdd.OriginalWord))
         {
+            _logger.Error("Original word could not be empty");
             throw new Exception("Word could not be empty");
         }
             
         if (string.IsNullOrWhiteSpace(dtoAdd.Translation))
         {
+            _logger.Error("Translation failed");
             throw new Exception("Translation failed");
         }
             
         if (!Enum.IsDefined(typeof(WordTypeEnum), dtoAdd.Type) )
         {
+            _logger.Error("This isn't a valid type");
             throw new Exception("This isn't a valid type");
         }
             
         if (!Enum.IsDefined(typeof(WordLevelEnum), dtoAdd.Level))
         {
+            _logger.Error("This isn't a valid level");
             throw new Exception("This isn't a valid level");
         }
-        
     }
 
     private void ValidationUpdDto(UpdateWordDto dtoUpd)
     {
+        if (dtoUpd.Id <= 0)
+        {
+            _logger.Error("Word id is invalid");
+            throw new Exception("Word id is invalid");
+        }
+
         if (string.IsNullOrWhiteSpace(dtoUpd.OriginalWord))
         {
+            _logger.Error("Word could not be empty");
             throw new Exception("Word could not be empty");
         }
+
         if (string.IsNullOrWhiteSpace(dtoUpd.Translation))
         {
+            _logger.Error("Translation failed");
             throw new Exception("Translation failed");
-        }
-            
+        } 
+
         if (!Enum.IsDefined(typeof(WordTypeEnum), dtoUpd.Type) )
         {
+            _logger.Error("This isn't a valid type");
             throw new Exception("This isn't a valid type");
         }
             
         if (!Enum.IsDefined(typeof(WordLevelEnum), dtoUpd.Level))
         {
+            _logger.Error("This isn't a valid level");
             throw new Exception("This isn't a valid level");
         }
-        
     }
 
 }

@@ -37,14 +37,14 @@ public class Dependency
     //    return new AuthService(GetAuthRepository(), LoggerService.GetLogger());
     //}
 
-    //private static IDictionaryRepository GetDictionaryRepository()
-    //{
-    //    return new DictionaryRepository(GetContext(), LoggerService.GetLogger());
-    //}
-    //public static IDictionaryService GetDictionaryService()
-    //{
-    //    return new DictionaryService(GetDictionaryRepository(), LoggerService.GetLogger());
-    //}
+    private static IDictionaryRepository GetDictionaryRepository()
+    {
+        return new DictionaryRepository(GetContext(), LoggerService.GetLogger());
+    }
+    public static IDictionaryService GetDictionaryService()
+    {
+        return new DictionaryService(GetDictionaryRepository(), LoggerService.GetLogger());
+    }
 
     private static IWordRepository GetWordRepository()
     {
