@@ -25,9 +25,13 @@ public class LearningLanguageAppDataContext: DbContext
 
         modelBuilder.Entity<Word>()
             .Property(w => w.Level)
-            .HasConversion<string>();      
+            .HasConversion<string>();
+        modelBuilder.Entity<User>()
+           .Property(w => w.Login)
+           .IsUnicode();
     }
     public DbSet<Word> Words { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Dictionary> Dictionaries { get; set; } 
 
 }

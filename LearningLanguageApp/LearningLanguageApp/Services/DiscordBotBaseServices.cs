@@ -1,5 +1,8 @@
 using Discord;
 using Discord.WebSocket;
+using LearningLanguageApp.BLL.Dtos;
+using LearningLanguageApp.BLL.Enums;
+using LearningLanguageApp.BLL.Models;
 using LearningLanguageApp.Services;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -67,7 +70,10 @@ public class DiscordBotBaseServices
     
     public async Task DiscordClient_SlashCommandExecuted(SocketSlashCommand arg)
     {
+
         var wordService = Dependency.GetWordService();
+
+
 
         switch (arg.CommandName)
         {
