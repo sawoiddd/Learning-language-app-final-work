@@ -13,6 +13,8 @@ public class GameService : IGameSerivce
 
     private IList<Word> _currentWords;
 
+    private const int _countOfWords = 10;
+
 
     public GameService(IGameRepository gameRepository)
     {
@@ -26,9 +28,8 @@ public class GameService : IGameSerivce
         {
             throw new Exception("Invalid dictionary id");
         }
-
-        //10 words just for now later (if we have time we will give user choice)
-        _currentWords = await _gameRepository.GetRandomWordsByDictionaryAsync(dictionaryId, 10, cancellationToken);
+        
+        _currentWords = await _gameRepository.GetRandomWordsByDictionaryAsync(dictionaryId, _countOfWords, cancellationToken);
         return _currentWords;
     }
 
