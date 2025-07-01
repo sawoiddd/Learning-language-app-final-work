@@ -3,6 +3,7 @@ using LearningLanguageApp.BLL.Enums;
 using LearningLanguageApp.BLL.Interfaces.Repositories;
 using LearningLanguageApp.BLL.Interfaces.Services;
 using LearningLanguageApp.BLL.Models;
+using Serilog;
 
 namespace LearningLanguageApp.Services;
 
@@ -10,17 +11,15 @@ public class GameService : IGameSerivce
 {
 
     private readonly IGameRepository _gameRepository;
-
     private IList<Word> _currentWords;
-
+    private readonly ILogger _logger;
     private const int CountOfWords = 10;
 
-
-    public GameService(IGameRepository gameRepository)
+    public GameService(IGameRepository gameRepository, ILogger logger)
     {
+        _logger = logger;
         _gameRepository = gameRepository;
     }
-
 
     public async Task<IList<Word>> StartGameAsync(int dictionaryId, CancellationToken cancellationToken)
     {

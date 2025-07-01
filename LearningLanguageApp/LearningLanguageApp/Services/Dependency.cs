@@ -31,4 +31,13 @@ public class Dependency
         return new WordService(GetWordRepository(), LoggerService.GetLogger());
     }
 
+    private static IGameRepository GetGameRepository()
+    {
+        return new GameRepository(GetContext(), LoggerService.GetLogger());
+    }
+    public static IGameSerivce GetGameSerivce()
+    {
+        return new GameService(GetGameRepository(), LoggerService.GetLogger());
+    }
+
 }
