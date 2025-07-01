@@ -10,21 +10,19 @@ namespace LearningLanguageApp.Services;
 
 public class WordService :  IWordService
 {
-    private readonly IWordRepository _WordRepository;
+    private readonly IWordRepository _wordRepository;
     private readonly LearningLanguageAppDataContext _context;
 
 
-    public WordService(IWordRepository IWordRepository)
+    public WordService(IWordRepository iWordRepository)
     {
-        _WordRepository = IWordRepository;
+        _wordRepository = iWordRepository;
     }
     
     public Task<Word> AddWordAsync(int dictionaryId, AddWordDto dto, CancellationToken cancellationToken)
     {
-        if (!ValidationAddDto(dto))
-        {
-            throw new Exception("Validation didn't pass word");
-        }
+        ValidationAddDto(dto);
+        
             var word = new Word()
             {
                 OriginalWord = dto.OriginalWord,
@@ -36,16 +34,14 @@ public class WordService :  IWordService
                 
             };
         
-            return _WordRepository.AddWordAsync(dictionaryId, word, cancellationToken);
+            return _wordRepository.AddWordAsync(dictionaryId, word, cancellationToken);
     }
     
 
     public Task<Word> UpdateWordAsync(UpdateWordDto word, CancellationToken cancellationToken)
     {
-        if (ValidationUpdDto(word))
-        {
-            throw new Exception("Validation didn't pass word");
-        }
+        ValidationUpdDto(word);
+        
         
         var updatedWord = new Word
             {
@@ -56,7 +52,7 @@ public class WordService :  IWordService
                 Level = word.Level,
                 DictionaryID = -1 
             }; 
-        return _WordRepository.UpdateWordAsync(updatedWord,  cancellationToken);
+        return _wordRepository.UpdateWordAsync(updatedWord,  cancellationToken);
             
     }
 
@@ -67,7 +63,7 @@ public class WordService :  IWordService
                 throw new Exception("Word id is invalid");
             }
             
-            return _WordRepository.DeleteWordAsync(wordId, cancellationToken);
+            return _wordRepository.DeleteWordAsync(wordId, cancellationToken);
     }
 
     public Task<Word> MarkAsLearnedAsync(int wordId, CancellationToken cancellationToken)
@@ -78,7 +74,7 @@ public class WordService :  IWordService
             throw new Exception("Word id is invalid");
         }
     
-        return _WordRepository.LearnWordAsync(wordId, cancellationToken);
+        return _wordRepository.LearnWordAsync(wordId, cancellationToken);
     }
     
         
@@ -92,10 +88,10 @@ public class WordService :  IWordService
             throw new Exception("Dictionary ID is invalid");
         }
         
-        return _WordRepository.GetWordsByDictionaryAsync(dictionaryId, cancellationToken);        
+        return _wordRepository.GetWordsByDictionaryAsync(dictionaryId, cancellationToken);        
     }
     
-    private bool ValidationAddDto(AddWordDto dtoAdd)
+    private void ValidationAddDto(AddWordDto dtoAdd)
     {
         if (string.IsNullOrWhiteSpace(dtoAdd.OriginalWord))
         {
@@ -117,11 +113,9 @@ public class WordService :  IWordService
             throw new Exception("This isn't a valid level");
         }
         
-        return true;
-
     }
 
-    private bool ValidationUpdDto(UpdateWordDto dtoUpd)
+    private void ValidationUpdDto(UpdateWordDto dtoUpd)
     {
         if (string.IsNullOrWhiteSpace(dtoUpd.OriginalWord))
         {
@@ -141,8 +135,7 @@ public class WordService :  IWordService
         {
             throw new Exception("This isn't a valid level");
         }
-
-        return true;
+        
     }
 
 }
