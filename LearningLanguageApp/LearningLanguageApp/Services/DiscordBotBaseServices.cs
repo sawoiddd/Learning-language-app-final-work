@@ -1,7 +1,7 @@
-
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace LearningLanguageApp;
 
@@ -10,13 +10,14 @@ public class DiscordBotBaseServices
     private readonly DiscordSocketClient _discordClient;
     private  readonly DiscordSocketConfig _configDiscord;
     private readonly IConfigurationRoot _configJson;
-    
+    private readonly ILogger _logger;
     private readonly ulong _guildId;
     private readonly string _tokenBot;
     
     
-    public DiscordBotBaseServices()
+    public DiscordBotBaseServices(ILogger logger)
     {
+        _logger = logger;
         _configDiscord = new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.Guilds |
