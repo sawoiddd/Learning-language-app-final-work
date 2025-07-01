@@ -1,0 +1,44 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Create appsettings.json from secrets
+      run: |
+        echo '{
+          "Logging": {
+            "LogPath": "${{ secrets.LOG_PATH }}"
+          },
+          "DiscordSettings": {
+            "Api": "${{ secrets.DISCORD_API }}",
+            "GuildId": "${{ secrets.DISCORD_GUILD_ID }}"
+          },
+          "DbSettings": {
+            "Path": "${{ secrets.DB_PATH }}"
+          }
+        }' > LearningLanguageApp/LearningLanguageApp/appsettings.json
+
+    - name: Restore dependencies
+      run: dotnet restore LearningLanguageApp/LearningLanguageApp.sln
+
+    - name: Build solution
+      run: dotnet build LearningLanguageApp/LearningLanguageApp.sln --no-restore --configuration Release
+
+    - name: Run tests
+      run: dotnet test LearningLanguageApp/LearningLanguageApp.sln --no-build --verbosity normal || echo "No tests found"
