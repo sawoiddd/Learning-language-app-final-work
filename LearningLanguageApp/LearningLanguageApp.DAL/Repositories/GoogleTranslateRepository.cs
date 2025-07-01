@@ -1,13 +1,16 @@
 ﻿using System.Text.Json;
 using LearningLanguageApp.BLL.Interfaces.Repositories;
+using Serilog;
 
 namespace LearningLanguageApp.DAL.Repositories;
 
 public class GoogleTranslateRepository : IGoogleTranslateRepository
 {
     private readonly HttpClient _httpClient;
-    public GoogleTranslateRepository(HttpClient httpClient)
+    private readonly ILogger _logger;
+    public GoogleTranslateRepository(HttpClient httpClient,ILogger logger)
     {
+        _logger = logger;
         _httpClient = httpClient;
     }
 
@@ -20,7 +23,6 @@ public class GoogleTranslateRepository : IGoogleTranslateRepository
             throw new Exception("Translation failed");
 
         var jsonResponse = await response.Content.ReadAsStringAsync(cancellationToken);
-
 
 
         using var jsonDoc = JsonDocument.Parse(jsonResponse);

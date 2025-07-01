@@ -3,6 +3,7 @@ using LearningLanguageApp.BLL.Interfaces.Services;
 using LearningLanguageApp.DAL;
 using LearningLanguageApp.DAL.Repositories;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace LearningLanguageApp.Services;
 
@@ -16,11 +17,34 @@ public class Dependency
             .AddJsonFile(fileName, optional: false)
             .Build();
     }
+
+    private static HttpClient GetHttpClient()
+    {
+        return new HttpClient();
+    }
     private static LearningLanguageAppDataContext GetContext()
     {
         var path = _configuration["DbSettings:Path"];
         return new LearningLanguageAppDataContext(path);
     }
+
+    //private static IAuthRepository GetAuthRepository()
+    //{
+    //    return new AuthRepository(GetContext(), LoggerService.GetLogger());
+    //}
+    //public static IAuthSerivce GetAuthService()
+    //{
+    //    return new AuthService(GetAuthRepository(), LoggerService.GetLogger());
+    //}
+
+    //private static IDictionaryRepository GetDictionaryRepository()
+    //{
+    //    return new DictionaryRepository(GetContext(), LoggerService.GetLogger());
+    //}
+    //public static IDictionaryService GetDictionaryService()
+    //{
+    //    return new DictionaryService(GetDictionaryRepository(), LoggerService.GetLogger());
+    //}
 
     private static IWordRepository GetWordRepository()
     {
@@ -31,6 +55,15 @@ public class Dependency
         return new WordService(GetWordRepository(), LoggerService.GetLogger());
     }
 
+    private static IGoogleTranslateRepository GetTranslationRepository()
+    {
+        return new GoogleTranslateRepository(GetHttpClient(), LoggerService.GetLogger());
+    }
+    public static IGoogleTranslateService GetTranslationService()
+    {
+        return new GoogleTranslatorService(GetTranslationRepository(), LoggerService.GetLogger());
+    }
+
     private static IGameRepository GetGameRepository()
     {
         return new GameRepository(GetContext(), LoggerService.GetLogger());
@@ -39,5 +72,5 @@ public class Dependency
     {
         return new GameService(GetGameRepository(), LoggerService.GetLogger());
     }
-
 }
+
