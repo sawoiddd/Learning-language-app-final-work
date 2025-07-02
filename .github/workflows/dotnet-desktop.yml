@@ -40,5 +40,6 @@ jobs:
     - name: Build solution
       run: dotnet build LearningLanguageApp/LearningLanguageApp.sln --no-restore --configuration Release
 
-    - name: Run tests
-      run: dotnet test LearningLanguageApp/LearningLanguageApp.sln
+    - name: Run tests DAL
+      run: dotnet test LearningLanguageApp/LearningLanguageApp.sln 
+

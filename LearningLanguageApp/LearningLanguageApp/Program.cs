@@ -6,7 +6,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        var botBaseServices = new DiscordBotBaseServices(LoggerService.GetLogger());
+        var botBaseServices = new DiscordBotBaseServices(LoggerService.GetLogger(), new Dependency("appsettings.json"));
 
         await botBaseServices.InitializeAsync();
         botBaseServices.EventsStart();

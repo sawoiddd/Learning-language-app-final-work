@@ -13,6 +13,8 @@ public class GameService : IGameSerivce
     private IList<Word> _currentWords;
     private readonly ILogger _logger;
     private const int CountOfWords = 10;
+    
+    private GameMode _gameMode;
 
     public GameService(IGameRepository gameRepository, ILogger logger)
     {
@@ -20,7 +22,7 @@ public class GameService : IGameSerivce
         _gameRepository = gameRepository;
     }
 
-    public async Task<IList<Word>> StartGameAsync(int dictionaryId, CancellationToken cancellationToken)
+    public async Task<IList<Word>> StartGameAsync(int dictionaryId, GameMode gameMode, CancellationToken cancellationToken)
     {
         if (dictionaryId <= 0)
         {
@@ -29,6 +31,8 @@ public class GameService : IGameSerivce
         }
         
         _currentWords = await _gameRepository.GetRandomWordsByDictionaryAsync(dictionaryId, CountOfWords, cancellationToken);
+        
+        _gameMode = gameMode;
         
         if (_currentWords == null)
         {
@@ -40,7 +44,7 @@ public class GameService : IGameSerivce
         return _currentWords;
     }
 
-    public GameResult CheckAnswers(IDictionary<int, string> userAnswers, GameMode mode)
+    public GameResult CheckAnswers(IDictionary<int, string> userAnswers)
     {
         int correct = 0;
 
@@ -52,7 +56,7 @@ public class GameService : IGameSerivce
                 continue;
             }
 
-            string expected = mode == GameMode.OriginalToTranslation ? word.Translation : word.OriginalWord;
+            string expected = _gameMode == GameMode.OriginalToTranslation ? word.Translation : word.OriginalWord;
 
             if (string.Equals(expected, answer.Value, StringComparison.OrdinalIgnoreCase))
             {
