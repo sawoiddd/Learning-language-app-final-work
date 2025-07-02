@@ -11,7 +11,7 @@ public class DiscordBotBaseServices
     private readonly DiscordSocketClient _discordClient;
     private  readonly DiscordSocketConfig _configDiscord;
     private readonly IConfigurationRoot _configJson;
-    private readonly ILogger _logger;
+    private readonly ILogger _logger; //саша будь ласка пиши пиши логування, це дуже важливо для дебагу і розуміння що відбувається в коді
     private readonly ulong _guildId;
     private readonly string _tokenBot;
     

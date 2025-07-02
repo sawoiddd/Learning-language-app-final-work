@@ -26,7 +26,7 @@ public class GameRepository : IGameRepository
         if (allIds.Count == 0)
         {
             _logger.Error($"No words found in dictionary {dictionaryId}");
-            throw new KeyNotFoundException($"No words found in dictionary with ID {dictionaryId}");
+            return null;
         }
 
         if (count > allIds.Count)

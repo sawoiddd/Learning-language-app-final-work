@@ -28,8 +28,15 @@ public class GameService : IGameSerivce
             throw new Exception("Invalid dictionary id");
         }
         
-        _logger.Information($"Starting game with dictionary id: {dictionaryId}");
         _currentWords = await _gameRepository.GetRandomWordsByDictionaryAsync(dictionaryId, CountOfWords, cancellationToken);
+        
+        if (_currentWords == null)
+        {
+            _logger.Error($"Failed found words in dictionary {dictionaryId}");
+            throw new KeyNotFoundException($"No words found in dictionary {dictionaryId}");
+        }
+
+        _logger.Information($"Starting game with dictionary id: {dictionaryId}");
         return _currentWords;
     }
 

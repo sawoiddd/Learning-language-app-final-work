@@ -28,14 +28,14 @@ public class Dependency
         return new LearningLanguageAppDataContext(path);
     }
 
-    //private static IAuthRepository GetAuthRepository()
-    //{
-    //    return new AuthRepository(GetContext(), LoggerService.GetLogger());
-    //}
-    //public static IAuthSerivce GetAuthService()
-    //{
-    //    return new AuthService(GetAuthRepository(), LoggerService.GetLogger());
-    //}
+    private static IAuthRepository GetAuthRepository()
+    {
+        return new AuthRepository(GetContext(), LoggerService.GetLogger());
+    }
+    public static IAuthSerivce GetAuthService()
+    {
+        return new AuthService(GetAuthRepository(), LoggerService.GetLogger());
+    }
 
     private static IDictionaryRepository GetDictionaryRepository()
     {
