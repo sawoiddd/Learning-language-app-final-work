@@ -13,10 +13,19 @@ public class LearningLanguageAppDataContext: DbContext
     {
         _connectionString = connectionString;
     }
-    override protected void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public LearningLanguageAppDataContext(DbContextOptions<LearningLanguageAppDataContext> options)
+    : base(options)
     {
-        optionsBuilder.UseSqlServer(_connectionString);
     }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured && !string.IsNullOrEmpty(_connectionString))
+        {
+            optionsBuilder.UseSqlServer(_connectionString);
+        }
+    }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Word>()

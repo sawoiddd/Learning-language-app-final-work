@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LearningLanguageApp.BLL", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LearningLanguageApp.DAL", "LearningLanguageApp.DAL\LearningLanguageApp.DAL.csproj", "{68D3964F-AD07-4BDF-ADA7-9E336842C489}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LearningLanguageApp.DAL.Tests", "LearningLanguageApp.DAL.Tests\LearningLanguageApp.DAL.Tests.csproj", "{04045B52-B60B-40A5-AEA8-289148266A54}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{68D3964F-AD07-4BDF-ADA7-9E336842C489}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68D3964F-AD07-4BDF-ADA7-9E336842C489}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68D3964F-AD07-4BDF-ADA7-9E336842C489}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04045B52-B60B-40A5-AEA8-289148266A54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04045B52-B60B-40A5-AEA8-289148266A54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04045B52-B60B-40A5-AEA8-289148266A54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04045B52-B60B-40A5-AEA8-289148266A54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
