@@ -20,10 +20,8 @@ public class DiscordBotBaseServices
     private readonly CancellationTokenSource  _tokenSource; 
     private readonly Dictionary<ulong, User> _loggedInUsers; 
     
-    
     private readonly ulong _guildId;
     private readonly string _tokenBot;
-    
     
     public DiscordBotBaseServices(ILogger logger, Dependency dependency)
     {
@@ -44,15 +42,11 @@ public class DiscordBotBaseServices
         _tokenBot= _configJson["DiscordSettings:Api"];
         _guildId = ulong.Parse(_configJson["DiscordSettings:GuildId"]);
         
-        _discordClient = new DiscordSocketClient(_configDiscord);
-        
+        _discordClient = new DiscordSocketClient(_configDiscord);       
         _tokenSource = new CancellationTokenSource();
-        
         _loggedInUsers = new Dictionary<ulong, User>();
         
         _logger.Information("DiscordBotBaseServices initialized successfully.");
-
-
     }
 
     public async Task InitializeAsync()
@@ -63,7 +57,6 @@ public class DiscordBotBaseServices
         await _discordClient.StartAsync();
             
         _logger.Information("Discord bot logged in and started.");
-
     }
 
     public void EventsStart()
@@ -95,7 +88,6 @@ public class DiscordBotBaseServices
     {
         _logger.Information($"Slash command received: {arg.CommandName}");
 
-        
         var wordService = Dependency.GetWordService();
         var translationService = Dependency.GetTranslationService();
         var dictionaryService = Dependency.GetDictionaryService();
@@ -133,11 +125,11 @@ public class DiscordBotBaseServices
                     _logger.Information("login_user command executed successfully.");
 
                 }
-                    break;
+                break;
+
                 case "register_user":
                 {
                     _logger.Information("Executing register_user command...");
-
 
                     var firstName = GettingDataFromMsg(arg, "first_name");
                     var lastName = GettingDataFromMsg(arg, "last_name");
@@ -155,305 +147,267 @@ public class DiscordBotBaseServices
                     };
 
                     var response = await authService.RegisterAsync(regDto, _tokenSource.Token);
-
                     var textResponse = $"Welcome {response.FirstName}" +
                                        $"\nNow you have to login";
 
                     await arg.Channel.SendMessageAsync(textResponse);
 
                     _logger.Information("register_user command executed successfully.");
-
                 }
-                    break;
+                break;
 
                 default:
-                {
                     await arg.Channel.SendMessageAsync("Invalid command or you are not logged in.");
-                } break;
+                break;
             }
 
             if (IsUserLoggedIn(arg))
             {
-                        switch (arg.CommandName)
+                switch (arg.CommandName)
+                {
+                    case "create_dict":
                         {
-                            case "create_dict":
+                            _logger.Information("Executing create_dict command...");
+
+                            int userId = _loggedInUsers[arg.User.Id].Id;
+
+                            var sourceLanguage = GettingDataFromMsg(arg, "source_language");
+                            var targetLanguage = GettingDataFromMsg(arg, "target_language");
+
+                            var dictDto = new AddDictionaryDto()
                             {
-                                _logger.Information("Executing create_dict command...");
-
-                                
-                                int userId = _loggedInUsers[arg.User.Id].Id;
-                                
-                                var sourceLanguage = GettingDataFromMsg(arg, "source_language");
-                                var targetLanguage = GettingDataFromMsg(arg, "target_language");
-
-                                var dictDto = new AddDictionaryDto()
-                                {
-                                    UserId = userId,
-                                    SourceLanguage = sourceLanguage,
-                                    TargetLanguage = targetLanguage
-                                };
-                                
-                                var response = await dictionaryService.CreateDictionaryAsync(dictDto, userId, _tokenSource.Token);
-                                
-                                var responseText = $"Dict was added:" +
-                                                   $"\nId: {response.Id}" +
-                                                   "\nSource language: {sourceLanguage}" +
-                                                   "\nTarget language: {targetLanguage}";
-                                
-                                await arg.Channel.SendMessageAsync(responseText);
-                                                   
-                                
-                                _logger.Information("create_dict command executed successfully.");
-
-                            }
-                                break;
-                            
-                            case "update_dict":
-                            {
-                                _logger.Information("Executing update_dict command...");
-                                
-                                var sourceLanguage = GettingDataFromMsg(arg, "source_language");
-                                var targetLanguage = GettingDataFromMsg(arg, "target_language");
-                                int.TryParse(GettingDataFromMsg(arg, "dict_id"), out var dictId);
-
-                                var dictDto = new UpdateDictionaryDto()
-                                {
-                                    Id = dictId,
-                                    SourceLanguage = sourceLanguage,
-                                    TargetLanguage = targetLanguage
-                                };
-                                
-                                var response = await dictionaryService.UpdateDictionaryAsync(dictDto, _tokenSource.Token);
-                                
-                                var responseText = $"Dict was updated:" +
-                                                   $"\nId: {response.Id}" +
-                                                   "\nSource language: {sourceLanguage}" +
-                                                   "\nTarget language: {targetLanguage}";
-                                
-                                await arg.Channel.SendMessageAsync(responseText);
-                                
-                                _logger.Information("create_dict command executed successfully.");
-
-                            }
-                                break;
-
-                            case "delete_dict":
-                            {
-                                _logger.Information("Executing delete_dict command...");
-                                
-
-                                int.TryParse(GettingDataFromMsg(arg, "dict_id"), out var dictId);
-                                
-                                var response = await dictionaryService.DeleteDictionaryAsync(dictId, _tokenSource.Token);
-
-                                var resonseText = $"Dict with id : {response.Id} was deleted";
-                                
-                                await arg.Channel.SendMessageAsync(resonseText);
-                                
-                                
-                                _logger.Information("delete_dict command executed successfully.");
-
-                            }
-                                break;
-                            
-                            case "add_word":
-                            {
-                                _logger.Information("Executing add_word command...");
-
-
-                                var wordOrig = GettingDataFromMsg(arg, "word");
-                                var typeWord = GettingDataFromMsg(arg, "type");
-                                var lvlWord = GettingDataFromMsg(arg, "level");
-                                int.TryParse(GettingDataFromMsg(arg, "dictionary_id"), out var dictionaryId);
-
-
-                                var dictionary =
-                                    await dictionaryService.GetDictionaryByIdAsync(dictionaryId, _tokenSource.Token);
-
-                                var originalTranslation = dictionary.SourceLanguage;
-                                var targetLanguage = dictionary.TargetLanguage;
-
-
-                                var translation = await translationService.GetTranslateAsync(wordOrig,
-                                    originalTranslation,
-                                    targetLanguage, _tokenSource.Token);
-
-                                Enum.TryParse<WordTypeEnum>(typeWord, true, out var typeWordTypeEnum);
-                                Enum.TryParse<WordLevelEnum>(lvlWord, true, out var typeLevelEnum);
-
-
-                                var wordDto = new AddWordDto()
-                                {
-                                    OriginalWord = wordOrig,
-                                    Translation = translation,
-                                    Type = typeWordTypeEnum,
-                                    Level = typeLevelEnum,
-                                };
-
-                                var response =
-                                    await wordService.AddWordAsync(dictionaryId, wordDto, _tokenSource.Token);
-
-                                var textResponse = "Word added!\n" + ShowWord(response);
-
-                                await arg.Channel.SendMessageAsync(textResponse);
-
-                                _logger.Information("add_word command executed successfully.");
-
-                            }
-
-                                break;
-                            case "delete_word":
-                            {
-                                _logger.Information("Executing delete_word command...");
-
-
-                                int.TryParse(GettingDataFromMsg(arg, "id"), out var wordId);
-                                var response = await wordService.DeleteWordAsync(wordId, _tokenSource.Token);
-
-                                var textResponse = "Word Deleted\n" + ShowWord(response);
-
-                                await arg.Channel.SendMessageAsync(textResponse);
-
-                                _logger.Information("delete_word command executed successfully.");
-
-                            }
-
-                                break;
-                            case "update_word":
-                            {
-                                _logger.Information("Executing update_word command...");
-
-
-                                var wordOrig = GettingDataFromMsg(arg, "word");
-                                var wordTranslation = GettingDataFromMsg(arg, "translation");
-                                var typeWord = GettingDataFromMsg(arg, "type");
-                                var lvlWord = GettingDataFromMsg(arg, "level");
-                                int.TryParse(GettingDataFromMsg(arg, "dictionary_id"), out var dictionaryId);
-                                int.TryParse(GettingDataFromMsg(arg, "id"), out var id);
-
-                                Enum.TryParse<WordTypeEnum>(typeWord, true, out var typeWordTypeEnum);
-                                Enum.TryParse<WordLevelEnum>(lvlWord, true, out var typeLevelEnum);
-
-                                var wordDto = new UpdateWordDto()
-                                {
-                                    Id = id,
-                                    OriginalWord = wordOrig,
-                                    Translation = wordTranslation,
-                                    Type = typeWordTypeEnum,
-                                    Level = typeLevelEnum,
-                                };
-
-                                var response = await wordService.UpdateWordAsync(wordDto, _tokenSource.Token);
-
-                                var textResponse = "Word updated!\n" + ShowWord(response);
-
-                                await arg.Channel.SendMessageAsync(textResponse);
-
-                                _logger.Information("update_word command executed successfully.");
-                            }
-                                break;
-                            case "change_word_status":
-                            {
-                                _logger.Information("Executing change_word_status command...");
-
-
-                                int.TryParse(GettingDataFromMsg(arg, "id"), out var id);
-
-                                var response = await wordService.MarkAsLearnedAsync(id, _tokenSource.Token);
-                                var textResponse =
-                                    $"Word {response.Translation}({response.OriginalWord}) marked as learned, congratulations!";
-
-                                await arg.Channel.SendMessageAsync(textResponse);
-
-
-                                _logger.Information("change_word_status command executed successfully.");
-                            }
-                                break;
-                            case "show_all_words":
-                            {
-                                _logger.Information("Executing show_all_words command...");
-
-
-                                int.TryParse(GettingDataFromMsg(arg, "dictionary_id"), out var dictionaryId);
-
-                                var response = await wordService.GetWordsAsync(dictionaryId, _tokenSource.Token);
-
-                                var textResponse = "";
-
-                                foreach (var word in response)
-                                {
-                                    textResponse += ShowWord(word) + "\n\n";
-                                }
-
-                                await arg.Channel.SendMessageAsync(textResponse);
-
-                                _logger.Information("show_all_words command executed successfully.");
-
-
-                            }
-                                break;
-                            case "start_game":
-                            {
-                                _logger.Information("Executing start_game command...");
-                                
-                                
-                                int.TryParse(GettingDataFromMsg(arg, "dictionary_id"), out var dictionaryId);
-                                var gameMode = GettingDataFromMsg(arg, "game_mode");
-                                
-                                
-                                Enum.TryParse<GameMode>(gameMode, true, out var gameModeEnum);
-
-                                var response = await gameService.StartGameAsync(dictionaryId, gameModeEnum, _tokenSource.Token);
-
-                                string textResponse = "";
-
-                                for (int i = 1; i <= 10; i++)
-                                {
-                                    textResponse += $"{i}. {response[i]}";
-                                }
-
-                                await arg.Channel.SendMessageAsync("Here is list of word:\n" + textResponse);
-
-                                _logger.Information("start_game command executed successfully.");
-
-                            }
-                                break;
-
-                            case "check_words":
-                            {
-                                _logger.Information("Executing check_words command...");
-
-
-                                var words = GettingDataFromMsg(arg, "list_of_words");
-
-                                var dict = new Dictionary<int, string>();
-
-                                foreach (var word in words.Split(' '))
-                                {
-                                    var wordSplited = word.Split('.');
-
-                                    int.TryParse(wordSplited[0], out var key);
-
-                                    dict[key] = wordSplited[1];
-                                }
-
-                                var response = gameService.CheckAnswers(dict);
-                                var responseText = $"Results: {response.CorrectAnswers}/{response.TotalWords}";
-                                
-                                await arg.Channel.SendMessageAsync(responseText);
-                                
-                                
-                                _logger.Information("check_words command executed successfully.");
-                            }
-                                break;
-                            default:
-                                await arg.Channel.SendMessageAsync("Unknown command.");
-
-
-                                break;
+                                UserId = userId,
+                                SourceLanguage = sourceLanguage,
+                                TargetLanguage = targetLanguage
+                            };
+
+                            var response = await dictionaryService.CreateDictionaryAsync(dictDto, userId, _tokenSource.Token);
+                            var responseText = $"Dict was added:" +
+                                               $"\nId: {response.Id}" +
+                                               "\nSource language: {sourceLanguage}" +
+                                               "\nTarget language: {targetLanguage}";
+
+                            await arg.Channel.SendMessageAsync(responseText);
+
+                            _logger.Information("create_dict command executed successfully.");
                         }
-                    }
-            
+                    break;
+
+                    case "update_dict":
+                        {
+                            _logger.Information("Executing update_dict command...");
+
+                            var sourceLanguage = GettingDataFromMsg(arg, "source_language");
+                            var targetLanguage = GettingDataFromMsg(arg, "target_language");
+                            int.TryParse(GettingDataFromMsg(arg, "dict_id"), out var dictId);
+
+                            var dictDto = new UpdateDictionaryDto()
+                            {
+                                Id = dictId,
+                                SourceLanguage = sourceLanguage,
+                                TargetLanguage = targetLanguage
+                            };
+
+                            var response = await dictionaryService.UpdateDictionaryAsync(dictDto, _tokenSource.Token);
+                            var responseText = $"Dict was updated:" +
+                                               $"\nId: {response.Id}" +
+                                               "\nSource language: {sourceLanguage}" +
+                                               "\nTarget language: {targetLanguage}";
+
+                            await arg.Channel.SendMessageAsync(responseText);
+
+                            _logger.Information("create_dict command executed successfully.");
+                        }
+                    break;
+
+                    case "delete_dict":
+                        {
+                            _logger.Information("Executing delete_dict command...");
+
+                            int.TryParse(GettingDataFromMsg(arg, "dict_id"), out var dictId);
+
+                            var response = await dictionaryService.DeleteDictionaryAsync(dictId, _tokenSource.Token);
+                            var resonseText = $"Dict with id : {response.Id} was deleted";
+
+                            await arg.Channel.SendMessageAsync(resonseText);
+
+                            _logger.Information("delete_dict command executed successfully.");
+                        }
+                    break;
+
+                    case "add_word":
+                        {
+                            _logger.Information("Executing add_word command...");
+
+                            var wordOrig = GettingDataFromMsg(arg, "word");
+                            var typeWord = GettingDataFromMsg(arg, "type");
+                            var lvlWord = GettingDataFromMsg(arg, "level");
+                            int.TryParse(GettingDataFromMsg(arg, "dictionary_id"), out var dictionaryId);
+
+                            var dictionary = await dictionaryService.GetDictionaryByIdAsync(dictionaryId, _tokenSource.Token);
+
+                            var originalTranslation = dictionary.SourceLanguage;
+                            var targetLanguage = dictionary.TargetLanguage;
+
+                            var translation = await translationService.GetTranslateAsync(wordOrig,
+                                originalTranslation,
+                                targetLanguage, _tokenSource.Token);
+
+                            Enum.TryParse<WordTypeEnum>(typeWord, true, out var typeWordTypeEnum);
+                            Enum.TryParse<WordLevelEnum>(lvlWord, true, out var typeLevelEnum);
+
+                            var wordDto = new AddWordDto()
+                            {
+                                OriginalWord = wordOrig,
+                                Translation = translation,
+                                Type = typeWordTypeEnum,
+                                Level = typeLevelEnum,
+                            };
+
+                            var response = await wordService.AddWordAsync(dictionaryId, wordDto, _tokenSource.Token);
+                            var textResponse = "Word added!\n" + ShowWord(response);
+
+                            await arg.Channel.SendMessageAsync(textResponse);
+
+                            _logger.Information("add_word command executed successfully.");
+                        }
+                    break;
+
+                    case "delete_word":
+                        {
+                            _logger.Information("Executing delete_word command...");
+
+                            int.TryParse(GettingDataFromMsg(arg, "id"), out var wordId);
+
+                            var response = await wordService.DeleteWordAsync(wordId, _tokenSource.Token);
+                            var textResponse = "Word Deleted\n" + ShowWord(response);
+
+                            await arg.Channel.SendMessageAsync(textResponse);
+
+                            _logger.Information("delete_word command executed successfully.");
+                        }
+                    break;
+
+                    case "update_word":
+                        {
+                            _logger.Information("Executing update_word command...");
+
+                            var wordOrig = GettingDataFromMsg(arg, "word");
+                            var wordTranslation = GettingDataFromMsg(arg, "translation");
+                            var typeWord = GettingDataFromMsg(arg, "type");
+                            var lvlWord = GettingDataFromMsg(arg, "level");
+                            int.TryParse(GettingDataFromMsg(arg, "dictionary_id"), out var dictionaryId);
+                            int.TryParse(GettingDataFromMsg(arg, "id"), out var id);
+
+                            Enum.TryParse<WordTypeEnum>(typeWord, true, out var typeWordTypeEnum);
+                            Enum.TryParse<WordLevelEnum>(lvlWord, true, out var typeLevelEnum);
+
+                            var wordDto = new UpdateWordDto()
+                            {
+                                Id = id,
+                                OriginalWord = wordOrig,
+                                Translation = wordTranslation,
+                                Type = typeWordTypeEnum,
+                                Level = typeLevelEnum,
+                            };
+
+                            var response = await wordService.UpdateWordAsync(wordDto, _tokenSource.Token);
+                            var textResponse = "Word updated!\n" + ShowWord(response);
+
+                            await arg.Channel.SendMessageAsync(textResponse);
+
+                            _logger.Information("update_word command executed successfully.");
+                        }
+                    break;
+
+                    case "change_word_status":
+                        {
+                            _logger.Information("Executing change_word_status command...");
+
+                            int.TryParse(GettingDataFromMsg(arg, "id"), out var id);
+
+                            var response = await wordService.MarkAsLearnedAsync(id, _tokenSource.Token);
+                            var textResponse = $"Word {response.Translation}({response.OriginalWord}) marked as learned, congratulations!";
+
+                            await arg.Channel.SendMessageAsync(textResponse);
+
+                            _logger.Information("change_word_status command executed successfully.");
+                        }
+                    break;
+
+                    case "show_all_words":
+                        {
+                            _logger.Information("Executing show_all_words command...");
+
+                            int.TryParse(GettingDataFromMsg(arg, "dictionary_id"), out var dictionaryId);
+
+                            var response = await wordService.GetWordsAsync(dictionaryId, _tokenSource.Token);
+                            var textResponse = "";
+
+                            foreach (var word in response)
+                            {
+                                textResponse += ShowWord(word) + "\n\n";
+                            }
+
+                            await arg.Channel.SendMessageAsync(textResponse);
+
+                            _logger.Information("show_all_words command executed successfully.");
+                        }
+                        break;
+
+                    case "start_game":
+                        {
+                            _logger.Information("Executing start_game command...");
+
+                            int.TryParse(GettingDataFromMsg(arg, "dictionary_id"), out var dictionaryId);
+                            var gameMode = GettingDataFromMsg(arg, "game_mode");
+
+                            Enum.TryParse<GameMode>(gameMode, true, out var gameModeEnum);
+
+                            var response = await gameService.StartGameAsync(dictionaryId, gameModeEnum, _tokenSource.Token);
+                            string textResponse = "";
+
+                            for (int i = 1; i <= 10; i++)
+                            {
+                                textResponse += $"{i}. {response[i]}";
+                            }
+
+                            await arg.Channel.SendMessageAsync("Here is list of word:\n" + textResponse);
+
+                            _logger.Information("start_game command executed successfully.");
+                        }
+                    break;
+
+                    case "check_words":
+                        {
+                            _logger.Information("Executing check_words command...");
+
+                            var words = GettingDataFromMsg(arg, "list_of_words");
+                            var dict = new Dictionary<int, string>();
+
+                            foreach (var word in words.Split(' '))
+                            {
+                                var wordSplited = word.Split('.');
+
+                                int.TryParse(wordSplited[0], out var key);
+
+                                dict[key] = wordSplited[1];
+                            }
+
+                            var response = gameService.CheckAnswers(dict);
+                            var responseText = $"Results: {response.CorrectAnswers}/{response.TotalWords}";
+
+                            await arg.Channel.SendMessageAsync(responseText);
+
+                            _logger.Information("check_words command executed successfully.");
+                        }
+                    break;
+
+                    default:
+                        await arg.Channel.SendMessageAsync("Unknown command.");
+                    break;
+                }
+            } 
         }
         catch (Exception ex)
         {
@@ -461,15 +415,13 @@ public class DiscordBotBaseServices
 
             await arg.Channel.SendMessageAsync(ex.Message);
         } 
-        
-        
+
     }
     
     public async Task DiscordClient_Ready()
     {
         _logger.Information("Bot is ready. Registering commands...");
 
-        
         var createDictCommand = new SlashCommandBuilder()
             .WithName("create_dict")
             .WithDescription("Creates a new dictionary.")
@@ -493,8 +445,6 @@ public class DiscordBotBaseServices
             .AddOption("dict_id",  ApplicationCommandOptionType.String, "enter id of dict", isRequired: true)
             .Build();
 
-
-        
         var addWordCommand = new SlashCommandBuilder()
             .WithName("add_word")
             .WithDescription("Add word to dictionary")
@@ -530,7 +480,6 @@ public class DiscordBotBaseServices
             .WithName("show_all_words")
             .WithDescription("show all words")
             .AddOption("dictionary_id", ApplicationCommandOptionType.Boolean, "id of dictionary", isRequired: true)
-
             .Build();
         
         var loginUserCommand = new SlashCommandBuilder()
@@ -590,13 +539,10 @@ public class DiscordBotBaseServices
 
     private string ShowWord(Word word)
     {
-        var wordText = $"Original word: {word.OriginalWord}" +
-                       $"\nTranslation:  {word.Translation}" +
-                       $"\nType of word: {word.Type.ToString()}" +
-                       $"\nLevel of word: {word.Level.ToString()}";
-                       
-        
-        return wordText;
+        return $"Original word: {word.OriginalWord}" +
+               $"\nTranslation:  {word.Translation}" +
+               $"\nType of word: {word.Type.ToString()}" +
+               $"\nLevel of word: {word.Level.ToString()}";                     
     }
     
     private bool IsUserLoggedIn(SocketSlashCommand arg)
