@@ -1,10 +1,21 @@
-﻿namespace LearningLanguageApp;
+﻿using LearningLanguageApp.Services;
 
-internal class Program
+namespace LearningLanguageApp;
+
+class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
-        Console.WriteLine("Hello, World!");
+        var botBaseServices = new DiscordBotBaseServices(LoggerService.GetLogger(), new Dependency("appsettings.json"));
+
+        await botBaseServices.InitializeAsync();
+        botBaseServices.EventsStart();
+        
+        Console.WriteLine("Discord bot has started and is ready");
+
+        Console.ReadKey();
+
+        Console.WriteLine("Discord bot is now online!");
+
     }
 }
