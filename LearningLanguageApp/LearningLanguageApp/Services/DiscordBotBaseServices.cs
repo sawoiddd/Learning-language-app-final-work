@@ -176,6 +176,86 @@ public class DiscordBotBaseServices
             {
                         switch (arg.CommandName)
                         {
+                            case "create_dict":
+                            {
+                                _logger.Information("Executing create_dict command...");
+
+                                
+                                int userId = _loggedInUsers[arg.User.Id].Id;
+                                
+                                var sourceLanguage = GettingDataFromMsg(arg, "source_language");
+                                var targetLanguage = GettingDataFromMsg(arg, "target_language");
+
+                                var dictDto = new AddDictionaryDto()
+                                {
+                                    UserId = userId,
+                                    SourceLanguage = sourceLanguage,
+                                    TargetLanguage = targetLanguage
+                                };
+                                
+                                var response = await dictionaryService.CreateDictionaryAsync(dictDto, userId, _tokenSource.Token);
+                                
+                                var responseText = $"Dict was added:" +
+                                                   $"\nId: {response.Id}" +
+                                                   "\nSource language: {sourceLanguage}" +
+                                                   "\nTarget language: {targetLanguage}";
+                                
+                                await arg.Channel.SendMessageAsync(responseText);
+                                                   
+                                
+                                _logger.Information("create_dict command executed successfully.");
+
+                            }
+                                break;
+                            
+                            case "update_dict":
+                            {
+                                _logger.Information("Executing update_dict command...");
+                                
+                                var sourceLanguage = GettingDataFromMsg(arg, "source_language");
+                                var targetLanguage = GettingDataFromMsg(arg, "target_language");
+                                int.TryParse(GettingDataFromMsg(arg, "dict_id"), out var dictId);
+
+                                var dictDto = new UpdateDictionaryDto()
+                                {
+                                    Id = dictId,
+                                    SourceLanguage = sourceLanguage,
+                                    TargetLanguage = targetLanguage
+                                };
+                                
+                                var response = await dictionaryService.UpdateDictionaryAsync(dictDto, _tokenSource.Token);
+                                
+                                var responseText = $"Dict was updated:" +
+                                                   $"\nId: {response.Id}" +
+                                                   "\nSource language: {sourceLanguage}" +
+                                                   "\nTarget language: {targetLanguage}";
+                                
+                                await arg.Channel.SendMessageAsync(responseText);
+                                
+                                _logger.Information("create_dict command executed successfully.");
+
+                            }
+                                break;
+
+                            case "delete_dict":
+                            {
+                                _logger.Information("Executing delete_dict command...");
+                                
+
+                                int.TryParse(GettingDataFromMsg(arg, "dict_id"), out var dictId);
+                                
+                                var response = await dictionaryService.DeleteDictionaryAsync(dictId, _tokenSource.Token);
+
+                                var resonseText = $"Dict with id : {response.Id} was deleted";
+                                
+                                await arg.Channel.SendMessageAsync(resonseText);
+                                
+                                
+                                _logger.Information("delete_dict command executed successfully.");
+
+                            }
+                                break;
+                            
                             case "add_word":
                             {
                                 _logger.Information("Executing add_word command...");
@@ -390,6 +470,31 @@ public class DiscordBotBaseServices
         _logger.Information("Bot is ready. Registering commands...");
 
         
+        var createDictCommand = new SlashCommandBuilder()
+            .WithName("create_dict")
+            .WithDescription("Creates a new dictionary.")
+            .AddOption("source_language", ApplicationCommandOptionType.String, "enter source language", isRequired: true)
+            .AddOption("target_language", ApplicationCommandOptionType.String, "enter target language", isRequired: true)
+            .Build();
+
+        var updateDictCommand = new SlashCommandBuilder()
+            .WithName("update_dict")
+            .WithDescription("Updates a dictionary.")
+            .AddOption("dict_id", ApplicationCommandOptionType.String, "enter id of dict", isRequired: true)
+            .AddOption("source_language", ApplicationCommandOptionType.String, "enter source language",
+                isRequired: true)
+            .AddOption("target_language", ApplicationCommandOptionType.String, "enter target language",
+                isRequired: true)
+            .Build();
+        
+        var deleteDictCommand = new SlashCommandBuilder()
+            .WithName("delete_dict")
+            .WithDescription("Deletes a dictionary.")
+            .AddOption("dict_id",  ApplicationCommandOptionType.String, "enter id of dict", isRequired: true)
+            .Build();
+
+
+        
         var addWordCommand = new SlashCommandBuilder()
             .WithName("add_word")
             .WithDescription("Add word to dictionary")
@@ -461,6 +566,10 @@ public class DiscordBotBaseServices
         
         await _discordClient.Rest.CreateGuildCommand(loginUserCommand, _guildId);
         await _discordClient.Rest.CreateGuildCommand(registerUserCommand, _guildId);
+        
+        await _discordClient.Rest.CreateGuildCommand(createDictCommand, _guildId);
+        await _discordClient.Rest.CreateGuildCommand(updateDictCommand, _guildId);
+        await _discordClient.Rest.CreateGuildCommand(deleteDictCommand, _guildId);
         
         await _discordClient.Rest.CreateGuildCommand(addWordCommand, _guildId);
         await _discordClient.Rest.CreateGuildCommand(deleteWordCommand, _guildId);
