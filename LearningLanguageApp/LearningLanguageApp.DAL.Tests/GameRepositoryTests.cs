@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LearningLanguageApp.BLL.Models;
+﻿using LearningLanguageApp.BLL.Models;
 using LearningLanguageApp.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -22,9 +17,7 @@ public class GameRepositoryTests
            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
            .Options;
 
-        _context = new LearningLanguageAppDataContext("FakeConnection");
         _context = new LearningLanguageAppDataContext(options);
-
         _repository = new GameRepository(_context, _logger);
     }
 

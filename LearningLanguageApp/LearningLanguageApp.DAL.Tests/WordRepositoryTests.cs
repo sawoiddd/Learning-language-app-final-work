@@ -23,9 +23,7 @@ public class WordRepositoryTests
            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
            .Options;
 
-        _context = new LearningLanguageAppDataContext("FakeConnection");
         _context = new LearningLanguageAppDataContext(options);
-
         _repository = new WordRepository(_context, _logger);
     }
 
@@ -92,9 +90,9 @@ public class WordRepositoryTests
     {
         var words = new[]
         {
-        new Word { OriginalWord = "one", Translation = "один", DictionaryID = 10 },
-        new Word { OriginalWord = "two", Translation = "два", DictionaryID = 10 }
-    };
+            new Word { OriginalWord = "one", Translation = "один", DictionaryID = 10 },
+            new Word { OriginalWord = "two", Translation = "два", DictionaryID = 10 }
+        };
 
         _context.Words.AddRange(words);
         await _context.SaveChangesAsync();
