@@ -65,7 +65,7 @@ public class GameServiceTests
             { 2, "собака" }
         };
 
-        var result = _service.CheckAnswers(userAnswers);
+        var result = _service.CheckAnswers(userAnswers,GameMode.OriginalToTranslation,new List<Word>());
 
         Assert.NotNull(result);
     }
