@@ -40,6 +40,7 @@ public class WordRepository : IWordRepository
         existing.Type = word.Type;
         existing.Level = word.Level;
         existing.IsLearned = word.IsLearned;
+        existing.DictionaryID = existing.DictionaryID;
 
         await _context.SaveChangesAsync(cancellationToken);
 

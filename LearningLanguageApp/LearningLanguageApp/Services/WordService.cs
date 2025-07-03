@@ -45,6 +45,7 @@ public class WordService :  IWordService
         {
             Id = word.Id,
             OriginalWord = word.OriginalWord,
+            Translation = word.Translation,
             IsLearned = false,
             Type = word.Type,
             Level = word.Level,

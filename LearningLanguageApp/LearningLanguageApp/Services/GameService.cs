@@ -4,17 +4,15 @@ using LearningLanguageApp.BLL.Interfaces.Repositories;
 using LearningLanguageApp.BLL.Interfaces.Services;
 using LearningLanguageApp.BLL.Models;
 using Serilog;
+using System;
 
 namespace LearningLanguageApp.Services;
 
 public class GameService : IGameSerivce
 {
     private readonly IGameRepository _gameRepository;
-    private IList<Word> _currentWords;
     private readonly ILogger _logger;
     private const int CountOfWords = 10;
-    
-    private GameMode _gameMode;
 
     public GameService(IGameRepository gameRepository, ILogger logger)
     {
@@ -22,7 +20,7 @@ public class GameService : IGameSerivce
         _gameRepository = gameRepository;
     }
 
-    public async Task<IList<Word>> StartGameAsync(int dictionaryId, GameMode gameMode, CancellationToken cancellationToken)
+    public async Task<List<Word>> StartGameAsync(int dictionaryId, GameMode gameMode, CancellationToken cancellationToken)
     {
         if (dictionaryId <= 0)
         {
@@ -30,33 +28,32 @@ public class GameService : IGameSerivce
             throw new Exception("Invalid dictionary id");
         }
         
-        _currentWords = await _gameRepository.GetRandomWordsByDictionaryAsync(dictionaryId, CountOfWords, cancellationToken);
+        var words = await _gameRepository.GetRandomWordsByDictionaryAsync(dictionaryId, CountOfWords, cancellationToken);
         
-        _gameMode = gameMode;
-        
-        if (_currentWords == null)
+        if (words == null)
         {
             _logger.Error($"Failed found words in dictionary {dictionaryId}");
             throw new KeyNotFoundException($"No words found in dictionary {dictionaryId}");
         }
 
         _logger.Information($"Starting game with dictionary id: {dictionaryId}");
-        return _currentWords;
+        return words;
     }
 
-    public GameResult CheckAnswers(IDictionary<int, string> userAnswers)
+    public GameResult CheckAnswers(IDictionary<int, string> userAnswers, GameMode gameMode, List<Word> currentWords)
     {
         int correct = 0;
 
         foreach (var answer in userAnswers)
         {
-            var word = _currentWords.FirstOrDefault(x => x.Id.Equals(answer.Key));
-            if (word == null)
-            {
-                continue;
-            }
+            int index = answer.Key - 1;
 
-            string expected = _gameMode == GameMode.OriginalToTranslation ? word.Translation : word.OriginalWord;
+            if (index < 0 || index >= currentWords.Count)
+                continue;
+
+            var word = currentWords[index];
+
+            string expected = gameMode == GameMode.OriginalToTranslation ? word.Translation : word.OriginalWord;
 
             if (string.Equals(expected, answer.Value, StringComparison.OrdinalIgnoreCase))
             {
@@ -65,10 +62,10 @@ public class GameService : IGameSerivce
             }
         }
 
-        _logger.Information($"Game completed. Total words: {_currentWords.Count}, Correct answers: {correct}");
+        _logger.Information($"Game completed. Total words: {currentWords.Count}, Correct answers: {correct}");
         return new GameResult
         {
-            TotalWords = _currentWords.Count,
+            TotalWords = currentWords.Count,
             CorrectAnswers = correct
         };
     }
