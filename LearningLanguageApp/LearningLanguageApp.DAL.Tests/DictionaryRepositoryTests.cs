@@ -22,9 +22,7 @@ public class DictionaryRepositoryTests
            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
            .Options;
 
-        _context = new LearningLanguageAppDataContext("FakeConnection");
         _context = new LearningLanguageAppDataContext(options);
-
         _repository = new DictionaryRepository(_context, _logger);
     }
 
