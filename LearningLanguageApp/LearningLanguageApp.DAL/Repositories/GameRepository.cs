@@ -16,7 +16,7 @@ public class GameRepository : IGameRepository
         _logger = logger;
     }
 
-    public async Task<IList<Word>> GetRandomWordsByDictionaryAsync(int dictionaryId, int count, CancellationToken cancellationToken)
+    public async Task<List<Word>> GetRandomWordsByDictionaryAsync(int dictionaryId, int count, CancellationToken cancellationToken)
     {
         var query = _context.Words.Where(w => w.DictionaryID == dictionaryId)
             .Select(w => w.Id);
@@ -29,11 +29,23 @@ public class GameRepository : IGameRepository
             return null;
         }
 
+        if (allIds.Count == 0)
+        {
+            _logger.Error($"No words found in dictionary {dictionaryId}");
+            return null;
+        }
+
+        if (count <= 0)
+        {
+            _logger.Warning($"Requested word count is zero or negative: {count}");
+            return new List<Word>();
+        }
+
         if (count > allIds.Count)
         {
             count = allIds.Count;
         }
-            
+
         var randomIds = new HashSet<int>();
 
         while (randomIds.Count < count)
